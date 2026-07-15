@@ -8,7 +8,7 @@
 
 <meta name="author" content="Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC">
 
-<title>Populations and Samples</title>
+<title>Hypothesis Testing: Comparing Means</title>
 <style>
 
 code{white-space: pre-wrap;}
@@ -2347,7 +2347,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Populations and Samples</h1>
+<h1 class="title">Hypothesis Testing: Comparing Means</h1>
 </div>
 
 
@@ -2370,396 +2370,845 @@ window.Quarto = {
 </header>
 
 
-<section id="populations-and-samples" class="level2">
-<h2 class="anchored" data-anchor-id="populations-and-samples">Populations and Samples</h2>
-<p>In clinical research, understanding the concepts of populations and samples is crucial. A <strong>population</strong> refers to the entire group of individuals or instances about whom we hope to learn. A <strong>sample</strong> is a subset of the population that is actually observed or analyzed. For example, if we are studying the effects of a new drug on patients with a specific condition, the population would include all patients with that condition, while the sample would consist of those patients who participate in the study.</p>
-<p>For obvious reasons, we cannot study the entire population, so we rely on samples to make inferences about the population. Reasons why we use samples include:</p>
+<section id="hypothesis-testing-comparing-means" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-testing-comparing-means">Hypothesis Testing: Comparing Means</h2>
+<p>In clinical research, we frequently ask questions like: “Do males and females have different platelet counts?” or “Does treatment A work better than treatment B?” Hypothesis testing provides a statistical framework to answer these questions with quantified uncertainty.</p>
+<section id="the-hypothesis-testing-framework" class="level3">
+<h3 class="anchored" data-anchor-id="the-hypothesis-testing-framework">The Hypothesis Testing Framework</h3>
+<p>A <strong>hypothesis test</strong> evaluates evidence against a null hypothesis (<span class="math inline">\(H_0\)</span>) using sample data:</p>
 <ul>
-<li><strong>Feasibility</strong>: Studying the entire population may be impractical or impossible due to time, cost, or logistical constraints.</li>
-<li><strong>Efficiency</strong>: Samples allow researchers to obtain results more quickly and with fewer resources.</li>
-<li><strong>Ethical considerations</strong>: In clinical research, it may not be ethical to expose the entire population to a new treatment or intervention without prior evidence of its safety and efficacy.</li>
-<li><strong>Cost</strong>: Conducting research on a sample is often more cost-effective than studying the entire population, as it requires fewer resources and less time. Realistically too, you may not have access to the entire population, making it necessary to work with a sample.</li>
+<li><strong>Null Hypothesis (<span class="math inline">\(H_0\)</span>)</strong>: There is <strong>no difference</strong> between groups (e.g., mean platelets in males = mean platelets in females)</li>
+<li><strong>Alternative Hypothesis (<span class="math inline">\(H_1\)</span>)</strong>: There <strong>is a difference</strong> between groups</li>
+<li><strong>Test Statistic</strong>: A calculated value that measures how different the groups are</li>
+<li><strong>P-value</strong>: The probability of observing data this extreme (or more) if <span class="math inline">\(H_0\)</span> is true</li>
+<li><strong>Significance Level (<span class="math inline">\(\alpha\)</span>)</strong>: Typically 0.05, the threshold for deciding when to reject <span class="math inline">\(H_0\)</span></li>
 </ul>
-<p>When selecting a sample, it is important to ensure that it is representative of the population. This means that the characteristics of the sample should closely match those of the population, allowing for valid generalizations. Various sampling methods can be employed to achieve this, including random, stratified, and cluster sampling.</p>
-<div class="callout-info">
-<p>In this chapter, we focus on populations and samples, representativeness in clinical research, and various sampling methods with their implications for study design and data analysis. We’ll use <strong>tidyverse</strong>, a collection of R packages for data manipulation and visualization, including ggplot2, dplyr, tidyr, readr, purrr, and tibble. These packages provide a consistent, user-friendly interface for data work.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Important</strong>: A p-value is <strong>NOT</strong> the probability that the null hypothesis is true. It’s the probability of observing data this extreme if the null hypothesis were true. This is a crucial distinction often misunderstood in research.</p>
+</div>
+</div>
+</section>
 </section>
 <section id="setting-up-the-environment" class="level2">
-<h2 class="anchored" data-anchor-id="setting-up-the-environment">Setting up the Environment</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;tidyverse&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;tidyverse&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tidyverse&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;ggplot2&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tibble&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tidyr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;readr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;purrr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;dplyr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;stringr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;forcats&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;lubridate&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.2.1     ✔ readr     2.2.0
-✔ forcats   1.0.1     ✔ stringr   1.6.0
-✔ ggplot2   4.0.3     ✔ tibble    3.3.1
-✔ lubridate 1.9.5     ✔ tidyr     1.3.2
-✔ purrr     1.2.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-</div>
-</section>
-<section id="loading-the-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="loading-the-dataset">Loading the Dataset</h2>
-<div class="callout-success">
-<p>We use a synthetic dataset stored at a public URL. By storing the link as a variable, we make it easier to update or modify the data source in the future. The <code>read.csv()</code> function is a base R function that converts a CSV file into a data frame, which is R’s standard data structure for tabular data.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>link <span class="ot">&lt;-</span> <span class="st">&quot;https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv&quot;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(link)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="output-hidden" class="level2">
-<h2 class="anchored" data-anchor-id="output-hidden">Output Hidden</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The <code>output: false</code> option prevents the output from displaying because the dataset is too wide for the console. Run this code interactively to inspect the first few rows. Press Ctrl+Enter (Windows/Linux) or Cmd+Enter (Mac) with the cursor at the end of the line.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="exploring-your-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="exploring-your-dataset">Exploring Your Dataset</h2>
+<h2 class="anchored" data-anchor-id="setting-up-the-environment">Setting Up the Environment</h2>
 <div class="callout-info">
-<p>The output above didn’t print nicely because the dataset is too wide for the console. Several functions help with this:</p>
-<ul>
-<li><strong><code>View()</code></strong> — Opens data in a separate RStudio tab for scrolling (base R function)</li>
-<li><strong><code>view()</code></strong> — Tidyverse equivalent with similar functionality</li>
-<li><strong><code>glimpse()</code></strong> — Quick overview of structure and variable types, ideal for large datasets</li>
-<li><strong><code>as_tibble()</code></strong> — Convert to tibble format for cleaner, more readable console output</li>
-</ul>
-<p>Try any of these to explore the data more easily.</p>
+<p>We’ll analyze whether platelet counts differ between males and females using a two-sample t-test. The t-test is appropriate when comparing the means of two continuous variables across two independent groups.</p>
 </div>
-</section>
-<section id="converting-to-tibble-format" class="level2">
-<h2 class="anchored" data-anchor-id="converting-to-tibble-format">Converting to Tibble Format</h2>
-<div class="callout-success">
-<p>Tibbles are a modern take on R data frames that provide cleaner, more readable output, especially for wide datasets. The assignment operator <code>&lt;-</code> assigns the converted tibble back to the variable <code>df</code>.</p>
-</div>
-<div id="tbl-dataset" class="cell quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table 1
-</figcaption>
-<div aria-describedby="tbl-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(df)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the synthetic dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert platelets to numeric and suppress conversion warnings</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>labs_platelets_103ul <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">as.numeric</span>(df<span class="sc">$</span>labs_platelets_103ul))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="sc">!</span><span class="fu">is.na</span>(df<span class="sc">$</span>labs_platelets_103ul) <span class="sc">&amp;</span> df<span class="sc">$</span>demog_sex <span class="sc">!=</span> <span class="st">&quot;&quot;</span>, ]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Dataset prepared:&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 212
-  subjid      inclu_disease    dates_onsetdate dates_admdate dates_enrolmentdate
-  &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;              
-1 00000-00001 &quot;Avian influenz… 2025-03-23      2025-03-25    2025-03-25         
-2 00000-00002 &quot;&quot;               2025-01-25      2025-01-26    2025-01-26         
-3 00000-00003 &quot;&quot;               2025-01-14      2025-01-14    2025-01-14         
-4 00000-00004 &quot;&quot;               2025-03-06      2025-03-06    2025-03-06         
-5 00000-00005 &quot;&quot;               2025-01-13      2025-01-14    2025-01-14         
-6 00000-00006 &quot;&quot;               2025-03-26      2025-03-26    2025-03-26         
-# ℹ 207 more variables: demog_sex &lt;chr&gt;, demog_age &lt;dbl&gt;,
-#   demog_age_units &lt;chr&gt;, demog_healthcare &lt;chr&gt;, comor_hypertensi &lt;chr&gt;,
-#   comor_chrkidney &lt;chr&gt;, comor_chrkidney_stag &lt;chr&gt;,
-#   comor_liverdisease &lt;chr&gt;, comor_liverdisease_type &lt;chr&gt;,
-#   comor_obesity &lt;chr&gt;, comor_diabetes_yn &lt;chr&gt;, comor_smoking_yn &lt;chr&gt;,
-#   vacci_influenza_yn &lt;chr&gt;, adsym_fever &lt;chr&gt;, adsym_headache &lt;chr&gt;,
-#   daily_date &lt;chr&gt;, daily_date.1 &lt;chr&gt;, vital_highesttem_c &lt;dbl&gt;, …</code></pre>
+<pre><code>[1] &quot;Dataset prepared:&quot;</code></pre>
 </div>
-</div>
-</figure>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Some times, your particular focus will be on a variable, for that reason, you will process that variable to make it more usefule. <strong>A variable is a column of a dataset in this sense</strong>. To view the variables in the dataset, you can use the <code>colnames()</code> function, which returns a character vector containing the names of the variables (columns) in the dataset. This allows you to quickly identify the variables available for analysis and their corresponding names.</p>
-</section>
-<section id="exploring-column-names" class="level2">
-<h2 class="anchored" data-anchor-id="exploring-column-names">Exploring Column Names</h2>
-<div class="callout-info">
-<p>The <code>colnames()</code> function returns all variable names in the dataset. You can use the <code>view()</code> function (from tidyverse) to explore these names in a more readable format, particularly useful for wide datasets with many variables.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cnames <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>cnames</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="focusing-on-platelets" class="level2">
-<h2 class="anchored" data-anchor-id="focusing-on-platelets">Focusing on Platelets</h2>
-<div class="callout-info">
-<p>Our analysis focuses on the <code>labs_platelets_103ul</code> variable, so it’s important to examine it closely in the next steps.</p>
-</div>
-</section>
-<section id="summarizing-the-key-variable" class="level2">
-<h2 class="anchored" data-anchor-id="summarizing-the-key-variable">Summarizing the Key Variable</h2>
-<div class="callout-info">
-<p>The <code>summary()</code> function provides quick descriptive statistics for the <code>labs_platelets_103ul</code> variable, including mean, median, quartiles, and range. This gives us a first look at the variable’s distribution and potential data quality issues.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>labs_platelets_103ul)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Total observations:&quot;</span>, <span class="fu">nrow</span>(df))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
-  0.855   1.926   2.440   2.524   3.029   6.552     274 </code></pre>
+<pre><code>[1] &quot;Total observations: 1000&quot;</code></pre>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Variables: Platelets (10³/µL), Sex&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Variables: Platelets (10³/µL), Sex&quot;</code></pre>
 </div>
-<p>There are 1274 rows in the dataset, which means that there are 1274 observations available for analysis. This information is important to consider when interpreting our analyses, as sample size can affect the statistical power and generalizability of our findings. However, As you may notice, there are many mising values (1000) to be precise.</p>
-</section>
-<section id="understanding-functions" class="level2">
-<h2 class="anchored" data-anchor-id="understanding-functions">Understanding Functions</h2>
-<div class="callout-success">
-<p>This is a great moment to review how functions work. A function is a <strong>reusable</strong> piece of code that performs a specific task. Instead of writing the same code repeatedly, a function lets you execute it once, then call it many times with different inputs. This makes your code more efficient, maintainable, and less prone to errors.</p>
-</div>
-</section>
-<section id="creating-a-reusable-function" class="level2">
-<h2 class="anchored" data-anchor-id="creating-a-reusable-function">Creating a Reusable Function</h2>
-<div class="callout-success">
-<p>Functions are reusable pieces of code that perform specific tasks. This <code>sample_summary()</code> function computes key statistics (mean, SD, SE, N) for any variable. The <code>na.omit()</code> function removes missing values—critical because NAs can distort calculations. Standard error (SE = SD / √n) estimates the variability of the sample mean and is essential for confidence intervals and hypothesis tests.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sample_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(x)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  mean_x <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  sd_x <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  se_x <span class="ot">&lt;-</span> sd_x <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">data.frame</span>(</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean =</span> <span class="fu">round</span>(mean_x, <span class="dv">1</span>),</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">SD =</span> <span class="fu">round</span>(sd_x, <span class="dv">1</span>),</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">SE =</span> <span class="fu">round</span>(se_x, <span class="dv">2</span>),</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> n</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  ))</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout-info">
-<p>The standard error (SE) is calculated as the standard deviation (SD) divided by the square root of the sample size (n). This formula reflects how variability decreases as sample size increases, which is a fundamental concept in statistics.</p>
-<p><span class="math display">\[
-SE = \frac{SD}{\sqrt{n}}
-\]</span></p>
+<p><strong>Data Preparation</strong>: We convert platelets to numeric (suppressing warnings) and remove rows with missing values in either platelet count or sex. This ensures clean, complete data for the t-test.</p>
 </div>
 </section>
-<section id="testing-the-function" class="level2">
-<h2 class="anchored" data-anchor-id="testing-the-function">Testing the Function</h2>
-<div class="callout-info">
-<p>We test our <code>sample_summary()</code> function with a vector that contains a missing value (NA). This ensures the function correctly handles missing data by omitting it from calculations.</p>
-</div>
+<section id="exploratory-analysis-boxplot-by-sex" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-analysis-boxplot-by-sex">Exploratory Analysis: Boxplot by Sex</h2>
+<p>Before conducting a formal hypothesis test, it’s important to visualize the data. A boxplot shows the distribution of platelet counts separately for males and females, making any differences immediately apparent.</p>
+<section id="creating-the-boxplot" class="level3">
+<h3 class="anchored" data-anchor-id="creating-the-boxplot">Creating the Boxplot</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>vt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="cn">NA</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample_summary</span>(vt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  Mean  SD   SE N
-1    3 1.6 0.71 5</code></pre>
-</div>
-</div>
-</section>
-<section id="observing-na-handling" class="level2">
-<h2 class="anchored" data-anchor-id="observing-na-handling">Observing NA Handling</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Even though we passed 6 values to the function, it only used 5—because <code>na.omit()</code> removed the missing value (NA) from the calculations. This is critical to understand when working with real-world datasets: missing values are common and can distort analysis results if not handled properly. Our function ensures calculations are based only on available data.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="comparing-sampling-methods" class="level2">
-<h2 class="anchored" data-anchor-id="comparing-sampling-methods">Comparing Sampling Methods</h2>
-<div class="callout-success">
-<p>This code applies four different sampling methods to the dataset. Each method has distinct advantages and limitations:</p>
-<ul>
-<li><strong>Random Sample</strong>: Unbiased, each observation has equal probability</li>
-<li><strong>Systematic Sample</strong>: Every nth observation selected (simple but may miss patterns)</li>
-<li><strong>Stratified Sample</strong>: Samples from groups separately, ensuring representation of each group</li>
-<li><strong>Convenience Sample</strong>: Uses readily available data (biased, may not represent population well)</li>
-</ul>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>s_size <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>summary_pop <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(df<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>samp_random <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(df, s_size)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>summary_random <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_random<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>samp_systematic <span class="ot">&lt;-</span> df[<span class="fu">seq</span>(<span class="dv">1</span>, s_size <span class="sc">*</span> <span class="dv">10</span>, <span class="at">by =</span> <span class="dv">10</span>), ]</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>samp_systematic <span class="ot">&lt;-</span> <span class="fu">head</span>(samp_systematic, s_size)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>summary_systematic <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_systematic<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>samp_stratified <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(demog_sex) <span class="sc">%&gt;%</span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(s_size, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>summary_stratified <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_stratified<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>samp_convenience <span class="ot">&lt;-</span> <span class="fu">head</span>(df, s_size)</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>summary_convenience <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_convenience<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">Populaton =</span> summary_pop,</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">Random =</span> summary_random,</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">Systematic =</span> summary_systematic,</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">Stratified =</span> summary_stratified,</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">Convenience =</span> summary_convenience</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="interpreting-the-sampling-results" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-the-sampling-results">Interpreting the Sampling Results</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Compare each sample mean to the population mean (2.5). Differences indicate sampling bias. Try adjusting <code>s_size</code> and rerunning—you’ll see how sample size affects accuracy. Note: larger samples don’t guarantee better representation if the sampling method itself is biased (e.g., convenience sampling).</p>
-<p>Ethical consideration: In clinical research, smaller well-designed samples are preferable to larger ones that expose unnecessary risk to participants.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>            Mean  SD   SE    N
-Populaton    2.5 0.8 0.03 1000
-Random       2.6 0.6 0.16   14
-Systematic   2.4 1.0 0.22   20
-Stratified   2.5 1.1 0.20   30
-Convenience  2.6 0.9 0.20   20</code></pre>
-</div>
-</div>
-</section>
-<section id="testing-the-standard-error-of-different-sample-sizes" class="level2">
-<h2 class="anchored" data-anchor-id="testing-the-standard-error-of-different-sample-sizes">Testing the Standard Error of Different Sample Sizes</h2>
-<div class="callout-info">
-<p>Standard error decreases as sample size increases, but the relationship is not linear—it follows the formula SE = SD / √n. This section explores how SE varies across different sample sizes, illustrating the principle of diminishing returns: gains in precision become smaller as sample size grows.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>se_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">integer</span>(),</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Mean =</span> <span class="fu">numeric</span>(),</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">SD =</span> <span class="fu">numeric</span>(),</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">SE =</span> <span class="fu">numeric</span>()</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> sample_sizes) {</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  samp <span class="ot">&lt;-</span> <span class="fu">sample</span>(df<span class="sc">$</span>labs_platelets_103ul, n, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  stats <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp)</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  se_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    se_results,</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">n =</span> n, <span class="at">Mean =</span> stats<span class="sc">$</span>Mean, <span class="at">SD =</span> stats<span class="sc">$</span>SD, <span class="at">SE =</span> stats<span class="sc">$</span>SE)</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="results-table" class="level2">
-<h2 class="anchored" data-anchor-id="results-table">Results Table</h2>
-<div class="callout-success">
-<p>As sample size increases, standard error decreases, reflecting increased precision in our estimates. However, notice the diminishing returns: the SE decrease from n=10 to n=20 is more substantial than from n=200 to n=500.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>se_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    n Mean  SD   SE
-1  10  2.5 0.8 0.27
-2  20  2.6 0.8 0.23
-3  50  2.5 0.9 0.14
-4 100  2.5 0.8 0.08
-5 200  2.5 0.7 0.06
-6 500  2.6 0.8 0.04</code></pre>
-</div>
-</div>
-</section>
-<section id="key-insight-diminishing-returns" class="level2">
-<h2 class="anchored" data-anchor-id="key-insight-diminishing-returns">Key Insight: Diminishing Returns</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The steep drop in standard error at small sample sizes levels off as n increases. This illustrates why researchers must balance precision needs against practical constraints (time, cost, ethical burden). In clinical research, a sample of n=50 may offer sufficient precision without exposing unnecessary participants to risk.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  se_results<span class="sc">$</span>n,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  se_results<span class="sc">$</span>SE,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;b&quot;</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Sample size (n)&quot;</span>,</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Standard Error&quot;</span>,</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Standard Error vs Sample Size&quot;</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boxplot</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  labs_platelets_103ul <span class="sc">~</span> demog_sex,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Platelet Counts by Sex&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Sex&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Platelets (10³/µL)&quot;</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;lightpink&quot;</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;darkgray&quot;</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>(<span class="at">nx =</span> <span class="cn">NA</span>, <span class="at">ny =</span> <span class="cn">NULL</span>, <span class="at">col =</span> <span class="st">&quot;lightgray&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="fig-se-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-boxplot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-se-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img role="img" src="data:image/png;base64,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" class="img-fluid figure-img" width="672">
+<div aria-describedby="fig-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img role="img" src="data:image/png;base64,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" class="img-fluid figure-img" width="672">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-se-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 1: Standard Error vs Sample Size
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 1: Distribution of platelet counts by sex
 </figcaption>
 </figure>
 </div>
+</div>
+</div>
+<div class="callout-success">
+<p><strong>What to Look For</strong>: - Are the medians (center line) in each box substantially different? - Is there overlap in the interquartile ranges (the boxes)? - Are there outliers (points beyond the whiskers)?</p>
+<p>Visual inspection helps determine if a statistical test is likely to find a significant difference.</p>
+</div>
+</section>
+</section>
+<section id="separating-groups-for-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="separating-groups-for-analysis">Separating Groups for Analysis</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>group_male <span class="ot">&lt;-</span> df<span class="sc">$</span>labs_platelets_103ul[df<span class="sc">$</span>demog_sex <span class="sc">==</span> <span class="st">&quot;Male&quot;</span>]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>group_female <span class="ot">&lt;-</span> df<span class="sc">$</span>labs_platelets_103ul[df<span class="sc">$</span>demog_sex <span class="sc">==</span> <span class="st">&quot;Female&quot;</span>]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Descriptive Statistics ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Descriptive Statistics ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Males (n = %d):&quot;</span>, <span class="fu">length</span>(group_male)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Males (n = 470):&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;  Mean = %.2f, SD = %.2f, Median = %.2f&quot;</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(group_male),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sd</span>(group_male),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">median</span>(group_male)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;  Mean = 2.33, SD = 0.72, Median = 2.23&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Females (n = %d):&quot;</span>, <span class="fu">length</span>(group_female)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Females (n = 530):&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;  Mean = %.2f, SD = %.2f, Median = %.2f&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(group_female),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sd</span>(group_female),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">median</span>(group_female)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;  Mean = 2.69, SD = 0.85, Median = 2.64&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Difference in means: %.2f (10³/µL)&quot;</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(group_male) <span class="sc">-</span> <span class="fu">mean</span>(group_female)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Difference in means: -0.36 (10³/µL)&quot;</code></pre>
+</div>
+</div>
+</section>
+<section id="the-two-sample-t-test" class="level2">
+<h2 class="anchored" data-anchor-id="the-two-sample-t-test">The Two-Sample t-Test</h2>
+<section id="concept" class="level3">
+<h3 class="anchored" data-anchor-id="concept">Concept</h3>
+<p>The <strong>two-sample t-test</strong> (also called independent samples t-test) compares the means of two independent groups. The test statistic is:</p>
+<p><span class="math display">\[t = \frac{\overline{x}_1 - \overline{x}_2}{SE_{difference}}\]</span></p>
+<p>where <span class="math inline">\(SE_{difference} = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}\)</span></p>
+<p>The t-test assumes: 1. <strong>Independence</strong>: Observations within each group are independent 2. <strong>Normality</strong>: Data in each group is approximately normally distributed (t-test is robust to mild violations) 3. <strong>Equal variances</strong>: Variances are similar between groups (Welch’s t-test relaxes this assumption)</p>
+<div class="callout-info">
+<p>By default, R performs Welch’s t-test, which does not assume equal variances. This is generally recommended for real-world data.</p>
+</div>
+</section>
+<section id="performing-the-t-test" class="level3">
+<h3 class="anchored" data-anchor-id="performing-the-t-test">Performing the t-Test</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>t_test_result <span class="ot">&lt;-</span> <span class="fu">t.test</span>(group_male, group_female)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>t_test_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  group_male and group_female
+t = -7.2559, df = 996.57, p-value = 8.011e-13
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.4578107 -0.2628974
+sample estimates:
+mean of x mean of y 
+ 2.332789  2.693143 </code></pre>
+</div>
+</div>
+<div class="callout-info">
+<p><strong>Welch’s t-test</strong>: R automatically performs Welch’s t-test by default, which does not assume equal variances between groups. This is more robust and generally recommended for real-world data. Use <code>var.equal = TRUE</code> only if you have strong evidence of equal variances.</p>
+</div>
+</section>
+</section>
+<section id="interpreting-the-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-results">Interpreting the Results</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Key Output Explained
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The t-test output includes:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 39%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>t statistic</strong></td>
+<td>How many standard errors the difference in means is. Larger absolute values suggest greater differences.</td>
+</tr>
+<tr class="even">
+<td><strong>Degrees of freedom (df)</strong></td>
+<td>Related to sample size; affects the critical value for the t-statistic.</td>
+</tr>
+<tr class="odd">
+<td><strong>p-value</strong></td>
+<td>Probability of observing a difference this large if the null hypothesis were true.</td>
+</tr>
+<tr class="even">
+<td><strong>95% CI</strong></td>
+<td>Range of plausible values for the true difference in population means.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract and display key results</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>t_stat <span class="ot">&lt;-</span> t_test_result<span class="sc">$</span>statistic</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>p_val <span class="ot">&lt;-</span> t_test_result<span class="sc">$</span>p.value</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ci_lower <span class="ot">&lt;-</span> t_test_result<span class="sc">$</span>conf.int[<span class="dv">1</span>]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>ci_upper <span class="ot">&lt;-</span> t_test_result<span class="sc">$</span>conf.int[<span class="dv">2</span>]</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Hypothesis Test Results Summary ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Hypothesis Test Results Summary ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;t-statistic: %.4f&quot;</span>, t_stat))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;t-statistic: -7.2559&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;p-value: %.4f&quot;</span>, p_val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;p-value: 0.0000&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;95%% Confidence Interval: [%.2f, %.2f]&quot;</span>, ci_lower, ci_upper))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;95% Confidence Interval: [-0.46, -0.26]&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decision</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (p_val <span class="sc">&lt;</span> alpha) {</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  decision <span class="ot">&lt;-</span> <span class="st">&quot;REJECT the null hypothesis&quot;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;There IS statistically significant evidence that platelet counts differ between males and females.&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  decision <span class="ot">&lt;-</span> <span class="st">&quot;FAIL TO REJECT the null hypothesis&quot;</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;There is NOT sufficient evidence that platelet counts differ between males and females.&quot;</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Decision (α = 0.05): %s&quot;</span>, decision))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Decision (α = 0.05): REJECT the null hypothesis&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Interpretation: %s&quot;</span>, interpretation))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Interpretation: There IS statistically significant evidence that platelet counts differ between males and females.&quot;</code></pre>
+</div>
+</div>
+</section>
+<section id="effect-size" class="level2">
+<h2 class="anchored" data-anchor-id="effect-size">Effect Size</h2>
+<p>Beyond p-values, it’s important to report <strong>effect size</strong>—a measure of the magnitude of the difference:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Cohen&#39;s d (standardized effect size)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>pooled_sd <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  ((<span class="fu">length</span>(group_male) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sd</span>(group_male)<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">length</span>(group_female) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sd</span>(group_female)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">length</span>(group_male) <span class="sc">+</span> <span class="fu">length</span>(group_female) <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>cohens_d <span class="ot">&lt;-</span> (<span class="fu">mean</span>(group_male) <span class="sc">-</span> <span class="fu">mean</span>(group_female)) <span class="sc">/</span> pooled_sd</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Effect Size ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Effect Size ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Cohen&#39;s d: %.3f&quot;</span>, cohens_d))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Cohen&#39;s d: -0.455&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpret Cohen&#39;s d</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">abs</span>(cohens_d) <span class="sc">&lt;</span> <span class="fl">0.2</span>) {</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;Negligible effect&quot;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">abs</span>(cohens_d) <span class="sc">&lt;</span> <span class="fl">0.5</span>) {</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;Small effect&quot;</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">abs</span>(cohens_d) <span class="sc">&lt;</span> <span class="fl">0.8</span>) {</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;Medium effect&quot;</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;Large effect&quot;</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Interpretation: %s&quot;</span>, interpretation))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Interpretation: Small effect&quot;</code></pre>
+</div>
+</div>
+<div class="callout-success">
+<p><strong>Why Report Effect Size?</strong>: Even with large samples, a statistically significant p-value might reflect a tiny, clinically unimportant difference. Effect size tells us whether the difference is practically meaningful.</p>
+</div>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key Takeaways</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>Always visualize first</strong>: Use boxplots or other graphics to understand the data before testing.</p></li>
+<li><p><strong>p-value ≠ probability null is true</strong>: A p-value of 0.05 does NOT mean there’s a 5% chance the null hypothesis is true.</p></li>
+<li><p><strong>Report both p-values and effect sizes</strong>: Statistical significance and practical significance are different.</p></li>
+<li><p><strong>Check assumptions</strong>: Verify that data approximate normality and groups are independent.</p></li>
+<li><p><strong>Confidence interval is informative</strong>: The CI shows the range of plausible differences and is often more useful than just a p-value.</p></li>
+<li><p><strong>Multiple testing increases error</strong>: If you conduct many tests, some will appear significant by chance. Consider multiple testing corrections if appropriate.</p></li>
+</ol>
+</div>
+</div>
+</section>
+<section id="simple-tables-with-gtsummary-package" class="level2">
+<h2 class="anchored" data-anchor-id="simple-tables-with-gtsummary-package">Simple tables with <code>gtsummary</code> package</h2>
+<p>In addition to visualizations, tables are a great way to summarize your data. The <code>gtsummary</code> package in R allows you to create publication-ready summary tables. The syntax is straightforward and flexible, making it easy to customize tables for your specific needs.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package &#39;gtsummary&#39; was built under R version 4.6.1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(demog_sex, labs_platelets_103ul) <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tbl_summary</span>(</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> demog_sex,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">missing =</span> <span class="st">&quot;no&quot;</span>,</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">statistic =</span> <span class="fu">list</span>(<span class="fu">all_continuous</span>() <span class="sc">~</span> <span class="st">&quot;{mean} ({sd})&quot;</span>)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_difference</span>() <span class="sc">|&gt;</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_overall</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="rtjvpfwzss" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rtjvpfwzss table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#rtjvpfwzss thead, #rtjvpfwzss tbody, #rtjvpfwzss tfoot, #rtjvpfwzss tr, #rtjvpfwzss td, #rtjvpfwzss th {
+border-style: none;
+}
+#rtjvpfwzss p {
+margin: 0;
+padding: 0;
+}
+#rtjvpfwzss .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#rtjvpfwzss .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#rtjvpfwzss .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#rtjvpfwzss .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#rtjvpfwzss .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#rtjvpfwzss .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#rtjvpfwzss .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#rtjvpfwzss .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#rtjvpfwzss .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#rtjvpfwzss .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#rtjvpfwzss .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#rtjvpfwzss .gt_from_md > :first-child {
+margin-top: 0;
+}
+#rtjvpfwzss .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#rtjvpfwzss .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#rtjvpfwzss .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#rtjvpfwzss .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#rtjvpfwzss .gt_row_group_first td {
+border-top-width: 2px;
+}
+#rtjvpfwzss .gt_row_group_first th {
+border-top-width: 2px;
+}
+#rtjvpfwzss .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#rtjvpfwzss .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#rtjvpfwzss .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#rtjvpfwzss .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#rtjvpfwzss .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#rtjvpfwzss .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#rtjvpfwzss .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#rtjvpfwzss .gt_left {
+text-align: left;
+}
+#rtjvpfwzss .gt_center {
+text-align: center;
+}
+#rtjvpfwzss .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#rtjvpfwzss .gt_font_normal {
+font-weight: normal;
+}
+#rtjvpfwzss .gt_font_bold {
+font-weight: bold;
+}
+#rtjvpfwzss .gt_font_italic {
+font-style: italic;
+}
+#rtjvpfwzss .gt_super {
+font-size: 65%;
+}
+#rtjvpfwzss .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#rtjvpfwzss .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#rtjvpfwzss .gt_indent_1 {
+text-indent: 5px;
+}
+#rtjvpfwzss .gt_indent_2 {
+text-indent: 10px;
+}
+#rtjvpfwzss .gt_indent_3 {
+text-indent: 15px;
+}
+#rtjvpfwzss .gt_indent_4 {
+text-indent: 20px;
+}
+#rtjvpfwzss .gt_indent_5 {
+text-indent: 25px;
+}
+#rtjvpfwzss .katex-display {
+display: inline-flex !important;
+margin-bottom: 0.75em !important;
+}
+#rtjvpfwzss div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="gt_col_headings header">
+<th id="label" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
+<th id="stat_0" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Overall</strong><br>
+N = 1,000<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+<th id="stat_1" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Female</strong><br>
+N = 530<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+<th id="stat_2" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Male</strong><br>
+N = 470<span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+<th id="estimate" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Difference</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span></th>
+<th id="conf.low" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span></th>
+<th id="p.value" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>p-value</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span></th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">labs_platelets_103ul</td>
+<td class="gt_row gt_center" headers="stat_0">2.52 (0.81)</td>
+<td class="gt_row gt_center" headers="stat_1">2.69 (0.85)</td>
+<td class="gt_row gt_center" headers="stat_2">2.33 (0.72)</td>
+<td class="gt_row gt_center" headers="estimate">0.36</td>
+<td class="gt_row gt_center" headers="conf.low">0.26, 0.46</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_footnotes odd">
+<td colspan="7" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span> Mean (SD)</td>
+</tr>
+<tr class="gt_footnotes even">
+<td colspan="7" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>2</sup></span> Welch Two Sample t-test</td>
+</tr>
+<tr class="gt_sourcenotes odd">
+<td colspan="7" class="gt_sourcenote">Abbreviation: CI = Confidence Interval</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+<section id="when-to-use-the-t-test" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-the-t-test">When to Use the t-Test</h3>
+<ul>
+<li>Comparing means between <strong>two independent groups</strong></li>
+<li>Continuous outcome variable (e.g., platelet count)</li>
+<li>Approximately normal distributions</li>
+<li><strong>Not</strong> for paired data (use paired t-test instead)</li>
+<li><strong>Not</strong> for more than two groups (use ANOVA instead)</li>
+</ul>
+</section>
+</section>
+<section id="r-package-to-help-with-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="r-package-to-help-with-interpretation">R package to help with interpretation</h2>
+<p>As a beginner, you may find it helpful to use the <code>report</code> package in R, which provides plain-language interpretations of statistical results. This can help you understand the output of your tests and communicate findings effectively.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;report&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;report&quot;</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>report<span class="sc">::</span><span class="fu">report</span>(t_test_result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Effect sizes were labelled following Cohen&#39;s (1988) recommendations.
+
+The Welch Two Sample t-test testing the difference between group_male and
+group_female (mean of x = 2.33, mean of y = 2.69) suggests that the effect is
+negative, statistically significant, and small (difference = -0.36, 95% CI
+[-0.46, -0.26], t(996.57) = -7.26, p &lt; .001; Cohen&#39;s d = -0.46, 95% CI [-0.58,
+-0.33])</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Tip</strong>: Sometimes, you only need a single function from a package. In that case, you can use the <code>::</code> operator to call the function without loading the entire package. For example, <code>report::report()</code> calls the <code>report()</code> function from the <code>report</code> package, without attaching the entire package. In other cases, some pack may have conflicting function names, so using <code>::</code> ensures you are calling the correct function from the intended package. E.g. the <code>dplyr</code> and <code>MASS</code> packages both have a <code>select()</code> function, so you can use <code>dplyr::select()</code> to specify which one you want to use. A common convention is to load the library that you will use most often, and use <code>::</code> for functions from other packages or load the most infrequently used package last to avoid conflicts. In most cases therefore <code>library(MASS)</code> is loaded first before <code>library(dplyr)</code> so that <code>select()</code> will refer to the <code>dplyr</code> version of the function. Then if you need to use the <code>select()</code> function from the <code>MASS</code> package, you can call it as <code>MASS::select()</code>.</p>
 </div>
 </div>
 </section>

@@ -1,4 +1,5 @@
 ---
+title: "Populations and Samples"
 author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
 format: html
 self-contained: true

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC">
 
-<title>Populations and Samples</title>
+<title>Hypothesis Testing: Comparing Categorical Variables</title>
 <style>
 
 code{white-space: pre-wrap;}
@@ -2347,7 +2347,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Populations and Samples</h1>
+<h1 class="title">Hypothesis Testing: Comparing Categorical Variables</h1>
 </div>
 
 
@@ -2370,84 +2370,112 @@ window.Quarto = {
 </header>
 
 
-<section id="populations-and-samples" class="level2">
-<h2 class="anchored" data-anchor-id="populations-and-samples">Populations and Samples</h2>
-<p>In clinical research, understanding the concepts of populations and samples is crucial. A <strong>population</strong> refers to the entire group of individuals or instances about whom we hope to learn. A <strong>sample</strong> is a subset of the population that is actually observed or analyzed. For example, if we are studying the effects of a new drug on patients with a specific condition, the population would include all patients with that condition, while the sample would consist of those patients who participate in the study.</p>
-<p>For obvious reasons, we cannot study the entire population, so we rely on samples to make inferences about the population. Reasons why we use samples include:</p>
+<section id="hypothesis-testing-comparing-categorical-variables" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-testing-comparing-categorical-variables">Hypothesis Testing: Comparing Categorical Variables</h2>
+<p>While the t-test compares means between groups, the <strong>chi-squared test</strong> compares <strong>proportions</strong> or <strong>distributions</strong> of categorical variables across groups. Common questions include: “Does mortality rate differ between males and females?” or “Is there an association between treatment group and outcome?”</p>
+<section id="the-chi-squared-test-framework" class="level3">
+<h3 class="anchored" data-anchor-id="the-chi-squared-test-framework">The Chi-Squared Test Framework</h3>
+<p>The chi-squared test (<span class="math inline">\(\chi^2\)</span> test) evaluates whether the observed frequencies in a contingency table differ significantly from expected frequencies under independence:</p>
 <ul>
-<li><strong>Feasibility</strong>: Studying the entire population may be impractical or impossible due to time, cost, or logistical constraints.</li>
-<li><strong>Efficiency</strong>: Samples allow researchers to obtain results more quickly and with fewer resources.</li>
-<li><strong>Ethical considerations</strong>: In clinical research, it may not be ethical to expose the entire population to a new treatment or intervention without prior evidence of its safety and efficacy.</li>
-<li><strong>Cost</strong>: Conducting research on a sample is often more cost-effective than studying the entire population, as it requires fewer resources and less time. Realistically too, you may not have access to the entire population, making it necessary to work with a sample.</li>
+<li><strong>Null Hypothesis (<span class="math inline">\(H_0\)</span>)</strong>: The two variables are <strong>independent</strong> (no association)</li>
+<li><strong>Alternative Hypothesis (<span class="math inline">\(H_1\)</span>)</strong>: The two variables are <strong>associated</strong> (not independent)</li>
+<li><strong>Test Statistic</strong>: <span class="math inline">\(\chi^2 = \sum \frac{(\text{Observed} - \text{Expected})^2}{\text{Expected}}\)</span></li>
+<li><strong>P-value</strong>: Probability of observing data this extreme if <span class="math inline">\(H_0\)</span> is true</li>
 </ul>
-<p>When selecting a sample, it is important to ensure that it is representative of the population. This means that the characteristics of the sample should closely match those of the population, allowing for valid generalizations. Various sampling methods can be employed to achieve this, including random, stratified, and cluster sampling.</p>
-<div class="callout-info">
-<p>In this chapter, we focus on populations and samples, representativeness in clinical research, and various sampling methods with their implications for study design and data analysis. We’ll use <strong>tidyverse</strong>, a collection of R packages for data manipulation and visualization, including ggplot2, dplyr, tidyr, readr, purrr, and tibble. These packages provide a consistent, user-friendly interface for data work.</p>
+<div class="callout-success">
+<p><strong>When to Use Chi-Squared</strong>: - Comparing <strong>proportions</strong> between two or more categorical groups - Testing <strong>association</strong> between two categorical variables - Data organized in a <strong>contingency table</strong> (cross-tabulation) - Expected cell counts ≥ 5 in most cells</p>
 </div>
+</section>
 </section>
 <section id="setting-up-the-environment" class="level2">
-<h2 class="anchored" data-anchor-id="setting-up-the-environment">Setting up the Environment</h2>
+<h2 class="anchored" data-anchor-id="setting-up-the-environment">Setting Up the Environment</h2>
+<div class="callout-info">
+<p>We’ll analyze whether there is an association between sex (Male/Female) and patient outcome (Discharged/Death). This is a practical clinical question: do males and females have different mortality rates in this patient population?</p>
+<p>We’ll create a 2×2 contingency table and use the chi-squared test to evaluate independence.</p>
+</div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;tidyverse&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;tidyverse&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">warn.conflicts =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tidyverse&#39; was built under R version 4.6.1</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the synthetic dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">subset</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  df,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  demog_sex <span class="sc">%in%</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Female&quot;</span>) <span class="sc">&amp;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    outco_binary_outcome <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Discharged&quot;</span>, <span class="st">&quot;Death&quot;</span>) <span class="sc">&amp;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    demog_sex <span class="sc">!=</span> <span class="st">&quot;&quot;</span> <span class="sc">&amp;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    outco_binary_outcome <span class="sc">!=</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Dataset prepared:&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Dataset prepared:&quot;</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;ggplot2&#39; was built under R version 4.6.1</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Total observations (after filtering):&quot;</span>, <span class="fu">nrow</span>(df2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Total observations (after filtering): 882&quot;</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tibble&#39; was built under R version 4.6.1</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;Variables: Sex (Male/Female), Outcome (Discharged/Death)&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Variables: Sex (Male/Female), Outcome (Discharged/Death)&quot;</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;tidyr&#39; was built under R version 4.6.1</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;readr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;purrr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;dplyr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;stringr&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;forcats&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package &#39;lubridate&#39; was built under R version 4.6.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.2.1     ✔ readr     2.2.0
-✔ forcats   1.0.1     ✔ stringr   1.6.0
-✔ ggplot2   4.0.3     ✔ tibble    3.3.1
-✔ lubridate 1.9.5     ✔ tidyr     1.3.2
-✔ purrr     1.2.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
+<div class="callout-info">
+<p><strong>Data Filtering</strong>: We keep only complete cases for sex (Male/Female) and outcome (Discharged/Death). This excludes censored or missing observations, ensuring clean data for our 2×2 contingency table.</p>
 </div>
 </section>
-<section id="loading-the-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="loading-the-dataset">Loading the Dataset</h2>
+<section id="creating-the-contingency-table" class="level2">
+<h2 class="anchored" data-anchor-id="creating-the-contingency-table">Creating the Contingency Table</h2>
+<p>A <strong>contingency table</strong> (also called a cross-tabulation) displays the joint frequency distribution of two categorical variables.</p>
+<section id="basic-contingency-table" class="level3">
+<h3 class="anchored" data-anchor-id="basic-contingency-table">Basic Contingency Table</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>outco_binary_outcome <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  df2<span class="sc">$</span>outco_binary_outcome,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Discharged&quot;</span>, <span class="st">&quot;Death&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>tab_sex_mortality <span class="ot">&lt;-</span> <span class="fu">table</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Sex =</span> df2<span class="sc">$</span>demog_sex,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Outcome =</span> df2<span class="sc">$</span>outco_binary_outcome</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Contingency Table (Raw Counts) ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Contingency Table (Raw Counts) ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tab_sex_mortality</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        Outcome
+Sex      Discharged Death
+  Female        373    36
+  Male          418    55</code></pre>
+</div>
+</div>
 <div class="callout-success">
-<p>We use a synthetic dataset stored at a public URL. By storing the link as a variable, we make it easier to update or modify the data source in the future. The <code>read.csv()</code> function is a base R function that converts a CSV file into a data frame, which is R’s standard data structure for tabular data.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>link <span class="ot">&lt;-</span> <span class="st">&quot;https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv&quot;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(link)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Factor Conversion</strong>: We convert the outcome to a factor with ordered levels (Discharged first, Death second). This ensures proper handling in statistical models and controls the reference category for regression analyses.</p>
 </div>
 </section>
-<section id="output-hidden" class="level2">
-<h2 class="anchored" data-anchor-id="output-hidden">Output Hidden</h2>
+<section id="contingency-table-with-totals" class="level3">
+<h3 class="anchored" data-anchor-id="contingency-table-with-totals">Contingency Table with Totals</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add row and column margins (totals)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>tab_with_margins <span class="ot">&lt;-</span> <span class="fu">addmargins</span>(tab_sex_mortality)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Contingency Table with Row and Column Totals ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Contingency Table with Row and Column Totals ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tab_with_margins</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        Outcome
+Sex      Discharged Death Sum
+  Female        373    36 409
+  Male          418    55 473
+  Sum           791    91 882</code></pre>
+</div>
+</div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2458,310 +2486,825 @@ Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The <code>output: false</code> option prevents the output from displaying because the dataset is too wide for the console. Run this code interactively to inspect the first few rows. Press Ctrl+Enter (Windows/Linux) or Cmd+Enter (Mac) with the cursor at the end of the line.</p>
+<p><strong>Reading the Table</strong>: - Each cell contains the count of observations in that category combination - Row totals show how many males/females overall - Column totals show how many were discharged/died overall - The bottom-right cell is the grand total (N)</p>
 </div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="exploring-your-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="exploring-your-dataset">Exploring Your Dataset</h2>
+</section>
+<section id="calculating-proportions-and-rates" class="level2">
+<h2 class="anchored" data-anchor-id="calculating-proportions-and-rates">Calculating Proportions and Rates</h2>
+<p>Understanding proportions helps visualize the relationship before formal testing:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate mortality rate within each sex</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>male_total <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab_sex_mortality[<span class="st">&quot;Male&quot;</span>, ])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>female_total <span class="ot">&lt;-</span> <span class="fu">sum</span>(tab_sex_mortality[<span class="st">&quot;Female&quot;</span>, ])</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>male_deaths <span class="ot">&lt;-</span> tab_sex_mortality[<span class="st">&quot;Male&quot;</span>, <span class="st">&quot;Death&quot;</span>]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>female_deaths <span class="ot">&lt;-</span> tab_sex_mortality[<span class="st">&quot;Female&quot;</span>, <span class="st">&quot;Death&quot;</span>]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>male_mortality_rate <span class="ot">&lt;-</span> male_deaths <span class="sc">/</span> male_total</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>female_mortality_rate <span class="ot">&lt;-</span> female_deaths <span class="sc">/</span> female_total</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Mortality Rates by Sex ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Mortality Rates by Sex ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Males:   %d deaths out of %d (%.1f%%)&quot;</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  male_deaths,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  male_total,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  male_mortality_rate <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Males:   55 deaths out of 473 (11.6%)&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Females: %d deaths out of %d (%.1f%%)&quot;</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  female_deaths,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  female_total,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  female_mortality_rate <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Females: 36 deaths out of 409 (8.8%)&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Difference: %.1f percentage points&quot;</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  (male_mortality_rate <span class="sc">-</span> female_mortality_rate) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Difference: 2.8 percentage points&quot;</code></pre>
+</div>
+</div>
+</section>
+<section id="the-chi-squared-test" class="level2">
+<h2 class="anchored" data-anchor-id="the-chi-squared-test">The Chi-Squared Test</h2>
+<section id="concept-and-assumptions" class="level3">
+<h3 class="anchored" data-anchor-id="concept-and-assumptions">Concept and Assumptions</h3>
+<p>The chi-squared test compares <strong>observed frequencies</strong> (what we see in the data) to <strong>expected frequencies</strong> (what we’d expect if variables were independent).</p>
+<p><strong>Assumptions</strong>: 1. <strong>Independence of observations</strong>: Each observation belongs to only one cell 2. <strong>Minimum expected frequencies</strong>: Generally, expected counts should be ≥ 5 in most cells 3. <strong>Adequate sample size</strong>: Typically n ≥ 20 for 2×2 tables</p>
+</section>
+<section id="performing-the-chi-squared-test" class="level3">
+<h3 class="anchored" data-anchor-id="performing-the-chi-squared-test">Performing the Chi-Squared Test</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>chi <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(tab_sex_mortality, <span class="at">correct =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>chi</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  tab_sex_mortality
+X-squared = 1.8931, df = 1, p-value = 0.1689</code></pre>
+</div>
+</div>
 <div class="callout-info">
-<p>The output above didn’t print nicely because the dataset is too wide for the console. Several functions help with this:</p>
+<p><strong>Yates Correction</strong>: We use <code>correct = FALSE</code> for teaching clarity. The Yates continuity correction is conservative (makes it harder to reject H₀). In practice, many statisticians omit it for larger samples. See your field’s conventions.</p>
+</div>
+</section>
+<section id="examining-expected-frequencies" class="level3">
+<h3 class="anchored" data-anchor-id="examining-expected-frequencies">Examining Expected Frequencies</h3>
+<p>Before interpreting results, verify that the chi-squared test assumptions are met:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Expected Frequencies ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Expected Frequencies ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>chi<span class="sc">$</span>expected</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        Outcome
+Sex      Discharged    Death
+  Female   366.8016 42.19841
+  Male     424.1984 48.80159</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>min_expected <span class="ot">&lt;-</span> <span class="fu">min</span>(chi<span class="sc">$</span>expected)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Minimum expected frequency: %.2f&quot;</span>, min_expected))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Minimum expected frequency: 42.20&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (min_expected <span class="sc">&gt;=</span> <span class="dv">5</span>) {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">&quot;✓ All expected frequencies are ≥ 5 (assumption satisfied)&quot;</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;⚠ Warning: Some expected frequencies &lt; 5 (consider Fisher&#39;s exact test)&quot;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;✓ All expected frequencies are ≥ 5 (assumption satisfied)&quot;</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Assumption Check</strong>: The chi-squared test requires expected frequencies ≥ 5 in most cells. If this assumption is violated, use Fisher’s exact test instead, which is exact and doesn’t rely on this approximation.</p>
+</div>
+</div>
+<div class="callout-info">
+<p><strong>Expected Frequencies</strong>: These represent how many observations we’d expect in each cell if sex and outcome were completely independent. Large differences between observed and expected frequencies suggest association.</p>
+<p>Formula: <span class="math inline">\(E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand Total}}\)</span></p>
+</div>
+</section>
+</section>
+<section id="interpreting-the-results" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-the-results">Interpreting the Results</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>chi_stat <span class="ot">&lt;-</span> chi<span class="sc">$</span>statistic</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>df_chi <span class="ot">&lt;-</span> chi<span class="sc">$</span>parameter</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>p_val <span class="ot">&lt;-</span> chi<span class="sc">$</span>p.value</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">&quot;--- Chi-Squared Test Results ---&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;--- Chi-Squared Test Results ---&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;χ² statistic: %.4f&quot;</span>, chi_stat))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;χ² statistic: 1.8931&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Degrees of freedom: %d&quot;</span>, df_chi))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Degrees of freedom: 1&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;p-value: %.4f&quot;</span>, p_val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;p-value: 0.1689&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (p_val <span class="sc">&lt;</span> alpha) {</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  decision <span class="ot">&lt;-</span> <span class="st">&quot;REJECT the null hypothesis&quot;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;There IS statistically significant evidence of an association between sex and mortality outcome.&quot;</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  decision <span class="ot">&lt;-</span> <span class="st">&quot;FAIL TO REJECT the null hypothesis&quot;</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  interpretation <span class="ot">&lt;-</span> <span class="st">&quot;There is NOT sufficient evidence of an association between sex and mortality outcome.&quot;</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Decision (α = 0.05): %s&quot;</span>, decision))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Decision (α = 0.05): FAIL TO REJECT the null hypothesis&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Interpretation: %s&quot;</span>, interpretation))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Interpretation: There is NOT sufficient evidence of an association between sex and mortality outcome.&quot;</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>P-value Interpretation</strong>: - If p &lt; 0.05: We reject <span class="math inline">\(H_0\)</span> and conclude there IS a statistically significant association - If p ≥ 0.05: We fail to reject <span class="math inline">\(H_0\)</span>; we don’t have enough evidence to conclude there’s an association</p>
+<p>Remember: Failing to reject <span class="math inline">\(H_0\)</span> doesn’t prove no association exists—it just means we don’t have sufficient evidence from this data.</p>
+</div>
+</div>
+</section>
+<section id="effect-size-odds-ratio" class="level2">
+<h2 class="anchored" data-anchor-id="effect-size-odds-ratio">Effect Size: Odds Ratio</h2>
+<p>The p-value tells us whether an association exists, but the <strong>odds ratio (OR)</strong> quantifies the strength of that association. We’ll examine the odds of discharge vs. death, separately for each sex:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Group</th>
+<th>Odds of Discharge (vs. Death)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Males</td>
+<td>7.600</td>
+</tr>
+<tr class="even">
+<td>Females</td>
+<td>10.361</td>
+</tr>
+<tr class="odd">
+<td><strong>Odds Ratio (Males/Females)</strong></td>
+<td><strong>0.734</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="callout-info">
+<p><strong>What This Means</strong>:</p>
 <ul>
-<li><strong><code>View()</code></strong> — Opens data in a separate RStudio tab for scrolling (base R function)</li>
-<li><strong><code>view()</code></strong> — Tidyverse equivalent with similar functionality</li>
-<li><strong><code>glimpse()</code></strong> — Quick overview of structure and variable types, ideal for large datasets</li>
-<li><strong><code>as_tibble()</code></strong> — Convert to tibble format for cleaner, more readable console output</li>
-</ul>
-<p>Try any of these to explore the data more easily.</p>
-</div>
-</section>
-<section id="converting-to-tibble-format" class="level2">
-<h2 class="anchored" data-anchor-id="converting-to-tibble-format">Converting to Tibble Format</h2>
-<div class="callout-success">
-<p>Tibbles are a modern take on R data frames that provide cleaner, more readable output, especially for wide datasets. The assignment operator <code>&lt;-</code> assigns the converted tibble back to the variable <code>df</code>.</p>
-</div>
-<div id="tbl-dataset" class="cell quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl quarto-uncaptioned" id="tbl-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table 1
-</figcaption>
-<div aria-describedby="tbl-dataset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(df)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 212
-  subjid      inclu_disease    dates_onsetdate dates_admdate dates_enrolmentdate
-  &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;           &lt;chr&gt;         &lt;chr&gt;              
-1 00000-00001 &quot;Avian influenz… 2025-03-23      2025-03-25    2025-03-25         
-2 00000-00002 &quot;&quot;               2025-01-25      2025-01-26    2025-01-26         
-3 00000-00003 &quot;&quot;               2025-01-14      2025-01-14    2025-01-14         
-4 00000-00004 &quot;&quot;               2025-03-06      2025-03-06    2025-03-06         
-5 00000-00005 &quot;&quot;               2025-01-13      2025-01-14    2025-01-14         
-6 00000-00006 &quot;&quot;               2025-03-26      2025-03-26    2025-03-26         
-# ℹ 207 more variables: demog_sex &lt;chr&gt;, demog_age &lt;dbl&gt;,
-#   demog_age_units &lt;chr&gt;, demog_healthcare &lt;chr&gt;, comor_hypertensi &lt;chr&gt;,
-#   comor_chrkidney &lt;chr&gt;, comor_chrkidney_stag &lt;chr&gt;,
-#   comor_liverdisease &lt;chr&gt;, comor_liverdisease_type &lt;chr&gt;,
-#   comor_obesity &lt;chr&gt;, comor_diabetes_yn &lt;chr&gt;, comor_smoking_yn &lt;chr&gt;,
-#   vacci_influenza_yn &lt;chr&gt;, adsym_fever &lt;chr&gt;, adsym_headache &lt;chr&gt;,
-#   daily_date &lt;chr&gt;, daily_date.1 &lt;chr&gt;, vital_highesttem_c &lt;dbl&gt;, …</code></pre>
-</div>
-</div>
-</figure>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Some times, your particular focus will be on a variable, for that reason, you will process that variable to make it more usefule. <strong>A variable is a column of a dataset in this sense</strong>. To view the variables in the dataset, you can use the <code>colnames()</code> function, which returns a character vector containing the names of the variables (columns) in the dataset. This allows you to quickly identify the variables available for analysis and their corresponding names.</p>
-</section>
-<section id="exploring-column-names" class="level2">
-<h2 class="anchored" data-anchor-id="exploring-column-names">Exploring Column Names</h2>
-<div class="callout-info">
-<p>The <code>colnames()</code> function returns all variable names in the dataset. You can use the <code>view()</code> function (from tidyverse) to explore these names in a more readable format, particularly useful for wide datasets with many variables.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cnames <span class="ot">&lt;-</span> <span class="fu">colnames</span>(df)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>cnames</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="focusing-on-platelets" class="level2">
-<h2 class="anchored" data-anchor-id="focusing-on-platelets">Focusing on Platelets</h2>
-<div class="callout-info">
-<p>Our analysis focuses on the <code>labs_platelets_103ul</code> variable, so it’s important to examine it closely in the next steps.</p>
-</div>
-</section>
-<section id="summarizing-the-key-variable" class="level2">
-<h2 class="anchored" data-anchor-id="summarizing-the-key-variable">Summarizing the Key Variable</h2>
-<div class="callout-info">
-<p>The <code>summary()</code> function provides quick descriptive statistics for the <code>labs_platelets_103ul</code> variable, including mean, median, quartiles, and range. This gives us a first look at the variable’s distribution and potential data quality issues.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>labs_platelets_103ul)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
-  0.855   1.926   2.440   2.524   3.029   6.552     274 </code></pre>
-</div>
-</div>
-<p>There are 1274 rows in the dataset, which means that there are 1274 observations available for analysis. This information is important to consider when interpreting our analyses, as sample size can affect the statistical power and generalizability of our findings. However, As you may notice, there are many mising values (1000) to be precise.</p>
-</section>
-<section id="understanding-functions" class="level2">
-<h2 class="anchored" data-anchor-id="understanding-functions">Understanding Functions</h2>
-<div class="callout-success">
-<p>This is a great moment to review how functions work. A function is a <strong>reusable</strong> piece of code that performs a specific task. Instead of writing the same code repeatedly, a function lets you execute it once, then call it many times with different inputs. This makes your code more efficient, maintainable, and less prone to errors.</p>
-</div>
-</section>
-<section id="creating-a-reusable-function" class="level2">
-<h2 class="anchored" data-anchor-id="creating-a-reusable-function">Creating a Reusable Function</h2>
-<div class="callout-success">
-<p>Functions are reusable pieces of code that perform specific tasks. This <code>sample_summary()</code> function computes key statistics (mean, SD, SE, N) for any variable. The <code>na.omit()</code> function removes missing values—critical because NAs can distort calculations. Standard error (SE = SD / √n) estimates the variability of the sample mean and is essential for confidence intervals and hypothesis tests.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sample_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(x)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  mean_x <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  sd_x <span class="ot">&lt;-</span> <span class="fu">sd</span>(x)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  se_x <span class="ot">&lt;-</span> sd_x <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">data.frame</span>(</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean =</span> <span class="fu">round</span>(mean_x, <span class="dv">1</span>),</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">SD =</span> <span class="fu">round</span>(sd_x, <span class="dv">1</span>),</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">SE =</span> <span class="fu">round</span>(se_x, <span class="dv">2</span>),</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> n</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  ))</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="callout-info">
-<p>The standard error (SE) is calculated as the standard deviation (SD) divided by the square root of the sample size (n). This formula reflects how variability decreases as sample size increases, which is a fundamental concept in statistics.</p>
-<p><span class="math display">\[
-SE = \frac{SD}{\sqrt{n}}
-\]</span></p>
-</div>
-</section>
-<section id="testing-the-function" class="level2">
-<h2 class="anchored" data-anchor-id="testing-the-function">Testing the Function</h2>
-<div class="callout-info">
-<p>We test our <code>sample_summary()</code> function with a vector that contains a missing value (NA). This ensures the function correctly handles missing data by omitting it from calculations.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>vt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="cn">NA</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample_summary</span>(vt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  Mean  SD   SE N
-1    3 1.6 0.71 5</code></pre>
-</div>
-</div>
-</section>
-<section id="observing-na-handling" class="level2">
-<h2 class="anchored" data-anchor-id="observing-na-handling">Observing NA Handling</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Even though we passed 6 values to the function, it only used 5—because <code>na.omit()</code> removed the missing value (NA) from the calculations. This is critical to understand when working with real-world datasets: missing values are common and can distort analysis results if not handled properly. Our function ensures calculations are based only on available data.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="comparing-sampling-methods" class="level2">
-<h2 class="anchored" data-anchor-id="comparing-sampling-methods">Comparing Sampling Methods</h2>
-<div class="callout-success">
-<p>This code applies four different sampling methods to the dataset. Each method has distinct advantages and limitations:</p>
-<ul>
-<li><strong>Random Sample</strong>: Unbiased, each observation has equal probability</li>
-<li><strong>Systematic Sample</strong>: Every nth observation selected (simple but may miss patterns)</li>
-<li><strong>Stratified Sample</strong>: Samples from groups separately, ensuring representation of each group</li>
-<li><strong>Convenience Sample</strong>: Uses readily available data (biased, may not represent population well)</li>
+<li>An <strong>odds of discharge = 2.5</strong> means for every 1 death, there are 2.5 discharges</li>
+<li>The <strong>odds ratio compares these ratios</strong> between sexes</li>
+<li>If OR = 1.2: Males have 20% higher odds of discharge (vs. death) compared to females</li>
+<li>If OR &lt; 1: Females have better odds of discharge (vs. death)</li>
 </ul>
 </div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>s_size <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>summary_pop <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(df<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>samp_random <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(df, s_size)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>summary_random <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_random<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>samp_systematic <span class="ot">&lt;-</span> df[<span class="fu">seq</span>(<span class="dv">1</span>, s_size <span class="sc">*</span> <span class="dv">10</span>, <span class="at">by =</span> <span class="dv">10</span>), ]</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>samp_systematic <span class="ot">&lt;-</span> <span class="fu">head</span>(samp_systematic, s_size)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>summary_systematic <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_systematic<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>samp_stratified <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(demog_sex) <span class="sc">%&gt;%</span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(s_size, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>summary_stratified <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_stratified<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>samp_convenience <span class="ot">&lt;-</span> <span class="fu">head</span>(df, s_size)</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>summary_convenience <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp_convenience<span class="sc">$</span>labs_platelets_103ul)</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">Populaton =</span> summary_pop,</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">Random =</span> summary_random,</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">Systematic =</span> summary_systematic,</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">Stratified =</span> summary_stratified,</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">Convenience =</span> summary_convenience</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="interpreting-the-sampling-results" class="level2">
-<h2 class="anchored" data-anchor-id="interpreting-the-sampling-results">Interpreting the Sampling Results</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Compare each sample mean to the population mean (2.5). Differences indicate sampling bias. Try adjusting <code>s_size</code> and rerunning—you’ll see how sample size affects accuracy. Note: larger samples don’t guarantee better representation if the sampling method itself is biased (e.g., convenience sampling).</p>
-<p>Ethical consideration: In clinical research, smaller well-designed samples are preferable to larger ones that expose unnecessary risk to participants.</p>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>            Mean  SD   SE    N
-Populaton    2.5 0.8 0.03 1000
-Random       2.6 0.6 0.16   14
-Systematic   2.4 1.0 0.22   20
-Stratified   2.5 1.1 0.20   30
-Convenience  2.6 0.9 0.20   20</code></pre>
-</div>
-</div>
-</section>
-<section id="testing-the-standard-error-of-different-sample-sizes" class="level2">
-<h2 class="anchored" data-anchor-id="testing-the-standard-error-of-different-sample-sizes">Testing the Standard Error of Different Sample Sizes</h2>
-<div class="callout-info">
-<p>Standard error decreases as sample size increases, but the relationship is not linear—it follows the formula SE = SD / √n. This section explores how SE varies across different sample sizes, illustrating the principle of diminishing returns: gains in precision become smaller as sample size grows.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">500</span>)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>se_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">integer</span>(),</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Mean =</span> <span class="fu">numeric</span>(),</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">SD =</span> <span class="fu">numeric</span>(),</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">SE =</span> <span class="fu">numeric</span>()</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> sample_sizes) {</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  samp <span class="ot">&lt;-</span> <span class="fu">sample</span>(df<span class="sc">$</span>labs_platelets_103ul, n, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  stats <span class="ot">&lt;-</span> <span class="fu">sample_summary</span>(samp)</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  se_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    se_results,</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">n =</span> n, <span class="at">Mean =</span> stats<span class="sc">$</span>Mean, <span class="at">SD =</span> stats<span class="sc">$</span>SD, <span class="at">SE =</span> stats<span class="sc">$</span>SE)</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="results-table" class="level2">
-<h2 class="anchored" data-anchor-id="results-table">Results Table</h2>
 <div class="callout-success">
-<p>As sample size increases, standard error decreases, reflecting increased precision in our estimates. However, notice the diminishing returns: the SE decrease from n=10 to n=20 is more substantial than from n=200 to n=500.</p>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>se_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    n Mean  SD   SE
-1  10  2.5 0.8 0.27
-2  20  2.6 0.8 0.23
-3  50  2.5 0.9 0.14
-4 100  2.5 0.8 0.08
-5 200  2.5 0.7 0.06
-6 500  2.6 0.8 0.04</code></pre>
-</div>
+<p><strong>Understanding Odds Ratio</strong>: - OR = 1: No difference between groups - OR &gt; 1: First group has higher odds of the outcome - OR &lt; 1: First group has lower odds of the outcome - OR = 2 means “twice the odds” (100% higher odds)</p>
+<p>The OR is easier to interpret than raw frequencies and is commonly reported in clinical research.</p>
 </div>
 </section>
-<section id="key-insight-diminishing-returns" class="level2">
-<h2 class="anchored" data-anchor-id="key-insight-diminishing-returns">Key Insight: Diminishing Returns</h2>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The steep drop in standard error at small sample sizes levels off as n increases. This illustrates why researchers must balance precision needs against practical constraints (time, cost, ethical burden). In clinical research, a sample of n=50 may offer sufficient precision without exposing unnecessary participants to risk.</p>
-</div>
-</div>
+<section id="visualization-stacked-bar-chart" class="level2">
+<h2 class="anchored" data-anchor-id="visualization-stacked-bar-chart">Visualization: Stacked Bar Chart</h2>
+<p>A visual representation of the contingency table makes patterns easier to see:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  se_results<span class="sc">$</span>n,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  se_results<span class="sc">$</span>SE,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;b&quot;</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Sample size (n)&quot;</span>,</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Standard Error&quot;</span>,</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Standard Error vs Sample Size&quot;</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Discharged&quot;</span> <span class="ot">=</span> <span class="st">&quot;lightgreen&quot;</span>, <span class="st">&quot;Death&quot;</span> <span class="ot">=</span> <span class="st">&quot;lightcoral&quot;</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  tab_sex_mortality,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Patient Outcomes by Sex&quot;</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Sex&quot;</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Number of Patients&quot;</span>,</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> colors,</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend.text =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">args.legend =</span> <span class="fu">list</span>(<span class="at">x =</span> <span class="st">&quot;topright&quot;</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>),</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;darkgray&quot;</span>,</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>(<span class="at">nx =</span> <span class="cn">NA</span>, <span class="at">ny =</span> <span class="cn">NULL</span>, <span class="at">col =</span> <span class="st">&quot;lightgray&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="fig-se-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<div id="fig-bar-chart" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-se-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img role="img" src="data:image/png;base64,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" class="img-fluid figure-img" width="672">
+<div aria-describedby="fig-bar-chart-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img role="img" src="data:image/png;base64,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" class="img-fluid figure-img" width="672">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-se-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 1: Standard Error vs Sample Size
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bar-chart-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure 1: Outcomes by sex: stacked bar chart showing counts and proportions
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
+</section>
+<section id="alternative-fishers-exact-test" class="level2">
+<h2 class="anchored" data-anchor-id="alternative-fishers-exact-test">Alternative: Fisher’s Exact Test</h2>
+<p>If expected frequencies are too small (&lt; 5), the chi-squared test may not be reliable. Use <strong>Fisher’s exact test</strong> instead:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Test to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Expected cell counts ≥ 5</td>
+<td><strong>Chi-squared test</strong></td>
+</tr>
+<tr class="even">
+<td>Expected cell counts &lt; 5</td>
+<td><strong>Fisher’s exact test</strong></td>
+</tr>
+<tr class="odd">
+<td>Small sample (n &lt; 20)</td>
+<td><strong>Fisher’s exact test</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Code</strong>: <code>fisher_result &lt;- fisher.test(tab_sex_mortality)</code></p>
+<p>Fisher’s test is more conservative but provides exact p-values for small samples.</p>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key Takeaways</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>Chi-squared tests categorical associations</strong>: Use for comparing proportions or testing independence between categorical variables.</p></li>
+<li><p><strong>Always examine the contingency table</strong>: Look at raw counts and proportions before formal testing.</p></li>
+<li><p><strong>Check assumptions</strong>: Verify that most expected cell counts are ≥ 5. Use Fisher’s exact test for small expected counts.</p></li>
+<li><p><strong>Report both p-value and effect size</strong>: The p-value tells you IF an association exists; the odds ratio tells you HOW STRONG it is.</p></li>
+<li><p><strong>Causation ≠ association</strong>: A significant chi-squared test shows association, not causation. Sex doesn’t “cause” mortality differences; other factors (physical differences, comorbidities, etc.) may explain both.</p></li>
+<li><p><strong>Clinical vs. statistical significance</strong>: Statistical significance (p &lt; 0.05) doesn’t guarantee clinical importance. Consider whether the effect size (OR) is meaningful.</p></li>
+</ol>
+</div>
+</div>
+<p>Most of the examples in this section require a lot of manual coding and calculations. In R, specialized packages streamline these tasks significantly:</p>
+<div class="callout-success">
+<p><strong>Helpful Packages</strong>: - <strong><code>epitools</code></strong> — Calculate odds ratios and confidence intervals directly from contingency tables - <strong><code>gtsummary</code></strong> — Create publication-ready summary tables and perform chi-squared tests with single-function calls</p>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(epitools)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>odds_ratio_result <span class="ot">&lt;-</span> <span class="fu">oddsratio</span>(tab_sex_mortality)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>odds_ratio_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$data
+        Outcome
+Sex      Discharged Death Total
+  Female        373    36   409
+  Male          418    55   473
+  Total         791    91   882
+
+$measure
+        odds ratio with 95% C.I.
+Sex      estimate     lower    upper
+  Female 1.000000        NA       NA
+  Male   1.360898 0.8766628 2.136464
+
+$p.value
+        two-sided
+Sex      midp.exact fisher.exact chi.square
+  Female         NA           NA         NA
+  Male    0.1706247    0.1837188  0.1688572
+
+$correction
+[1] FALSE
+
+attr(,&quot;method&quot;)
+[1] &quot;median-unbiased estimate &amp; mid-p exact CI&quot;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(outco_binary_outcome <span class="sc">~</span> demog_sex, <span class="at">data =</span> df2, <span class="at">family =</span> binomial) <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tbl_regression</span>(<span class="at">exponentiate =</span> <span class="cn">TRUE</span>, <span class="at">label =</span> <span class="fu">list</span>(demog_sex <span class="sc">~</span> <span class="st">&quot;Sex&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="gjnhtgysbv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#gjnhtgysbv table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#gjnhtgysbv thead, #gjnhtgysbv tbody, #gjnhtgysbv tfoot, #gjnhtgysbv tr, #gjnhtgysbv td, #gjnhtgysbv th {
+border-style: none;
+}
+#gjnhtgysbv p {
+margin: 0;
+padding: 0;
+}
+#gjnhtgysbv .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#gjnhtgysbv .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#gjnhtgysbv .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#gjnhtgysbv .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#gjnhtgysbv .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#gjnhtgysbv .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#gjnhtgysbv .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#gjnhtgysbv .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#gjnhtgysbv .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#gjnhtgysbv .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#gjnhtgysbv .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#gjnhtgysbv .gt_from_md > :first-child {
+margin-top: 0;
+}
+#gjnhtgysbv .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#gjnhtgysbv .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#gjnhtgysbv .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#gjnhtgysbv .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#gjnhtgysbv .gt_row_group_first td {
+border-top-width: 2px;
+}
+#gjnhtgysbv .gt_row_group_first th {
+border-top-width: 2px;
+}
+#gjnhtgysbv .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#gjnhtgysbv .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#gjnhtgysbv .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#gjnhtgysbv .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#gjnhtgysbv .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#gjnhtgysbv .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#gjnhtgysbv .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#gjnhtgysbv .gt_left {
+text-align: left;
+}
+#gjnhtgysbv .gt_center {
+text-align: center;
+}
+#gjnhtgysbv .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#gjnhtgysbv .gt_font_normal {
+font-weight: normal;
+}
+#gjnhtgysbv .gt_font_bold {
+font-weight: bold;
+}
+#gjnhtgysbv .gt_font_italic {
+font-style: italic;
+}
+#gjnhtgysbv .gt_super {
+font-size: 65%;
+}
+#gjnhtgysbv .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#gjnhtgysbv .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#gjnhtgysbv .gt_indent_1 {
+text-indent: 5px;
+}
+#gjnhtgysbv .gt_indent_2 {
+text-indent: 10px;
+}
+#gjnhtgysbv .gt_indent_3 {
+text-indent: 15px;
+}
+#gjnhtgysbv .gt_indent_4 {
+text-indent: 20px;
+}
+#gjnhtgysbv .gt_indent_5 {
+text-indent: 25px;
+}
+#gjnhtgysbv .katex-display {
+display: inline-flex !important;
+margin-bottom: 0.75em !important;
+}
+#gjnhtgysbv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="gt_col_headings header">
+<th id="label" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
+<th id="estimate" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>OR</strong></th>
+<th id="conf.low" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>95% CI</strong></th>
+<th id="p.value" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>p-value</strong></th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">Sex</td>
+<td class="gt_row gt_center" headers="estimate"><br>
+</td>
+<td class="gt_row gt_center" headers="conf.low"><br>
+</td>
+<td class="gt_row gt_center" headers="p.value"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">    Female</td>
+<td class="gt_row gt_center" headers="estimate">—</td>
+<td class="gt_row gt_center" headers="conf.low">—</td>
+<td class="gt_row gt_center" headers="p.value"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">    Male</td>
+<td class="gt_row gt_center" headers="estimate">1.36</td>
+<td class="gt_row gt_center" headers="conf.low">0.88, 2.14</td>
+<td class="gt_row gt_center" headers="p.value">0.2</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_sourcenotes odd">
+<td colspan="4" class="gt_sourcenote">Abbreviations: CI = Confidence Interval, OR = Odds Ratio</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+<section id="when-to-use-chi-squared-vs.-other-tests" class="level3">
+<h3 class="anchored" data-anchor-id="when-to-use-chi-squared-vs.-other-tests">When to Use Chi-Squared vs. Other Tests</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Two <strong>categorical</strong> variables</td>
+<td><strong>Chi-squared</strong> or Fisher’s exact</td>
+</tr>
+<tr class="even">
+<td>One <strong>categorical</strong> (2 groups), one <strong>continuous</strong></td>
+<td><strong>t-test</strong></td>
+</tr>
+<tr class="odd">
+<td>One <strong>categorical</strong> (3+ groups), one <strong>continuous</strong></td>
+<td><strong>ANOVA</strong></td>
+</tr>
+<tr class="even">
+<td>Both variables <strong>continuous</strong></td>
+<td><strong>Correlation/Regression</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 </main>
