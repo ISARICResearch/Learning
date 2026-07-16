@@ -27,16 +27,13 @@ The script checks for existing installations and only installs missing packages.
 
 Navigate to the `Introduction-to-Statistics-for-Clinical-Research-main/` directory and render any Quarto document (`.qmd`):
 
-```bash
-quarto render "1_Descriptive Statistics_CREDO.qmd"
-```
-
-Or in R:
+R:
 
 ```r
 quarto::quarto_render("Introduction-to-Statistics-for-Clinical-Research-main/1_Descriptive Statistics_CREDO.qmd")
 ```
 
+While in RStudio, you can also click on the `Preview/Render` button to process the file.
 ---
 
 ## Course Materials Overview
