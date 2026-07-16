@@ -21,7 +21,7 @@ The chi-squared test ($\chi^2$ test) evaluates whether the observed frequencies 
 - **Test Statistic**: $\chi^2 = \sum \frac{(\text{Observed} - \text{Expected})^2}{\text{Expected}}$
 - **P-value**: Probability of observing data this extreme if $H_0$ is true
 
-::: {.callout-success}
+::: {.callout-tip}
 **When to Use Chi-Squared**:
 - Comparing **proportions** between two or more categorical groups
 - Testing **association** between two categorical variables
@@ -31,7 +31,7 @@ The chi-squared test ($\chi^2$ test) evaluates whether the observed frequencies 
 
 ## Setting Up the Environment
 
-::: {.callout-info}
+::: {.callout-note}
 We'll analyze whether there is an association between sex (Male/Female) and patient outcome (Discharged/Death). This is a practical clinical question: do males and females have different mortality rates in this patient population?
 
 We'll create a 2×2 contingency table and use the chi-squared test to evaluate independence.
@@ -59,7 +59,7 @@ paste("Total observations (after filtering):", nrow(df2))
 paste("Variables: Sex (Male/Female), Outcome (Discharged/Death)")
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 **Data Filtering**: We keep only complete cases for sex (Male/Female) and outcome (Discharged/Death). This excludes censored or missing observations, ensuring clean data for our 2×2 contingency table.
 :::
 
@@ -86,7 +86,7 @@ paste("--- Contingency Table (Raw Counts) ---")
 tab_sex_mortality
 ```
 
-::: {.callout-success}
+::: {.callout-tip}
 **Factor Conversion**: We convert the outcome to a factor with ordered levels (Discharged first, Death second). This ensures proper handling in statistical models and controls the reference category for regression analyses.
 :::
 
@@ -166,7 +166,7 @@ chi <- chisq.test(tab_sex_mortality, correct = FALSE)
 chi
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 **Yates Correction**: We use `correct = FALSE` for teaching clarity. The Yates continuity correction is conservative (makes it harder to reject H₀). In practice, many statisticians omit it for larger samples. See your field's conventions.
 :::
 
@@ -196,7 +196,7 @@ if (min_expected >= 5) {
 **Assumption Check**: The chi-squared test requires expected frequencies ≥ 5 in most cells. If this assumption is violated, use Fisher's exact test instead, which is exact and doesn't rely on this approximation.
 :::
 
-::: {.callout-info}
+::: {.callout-note}
 **Expected Frequencies**: These represent how many observations we'd expect in each cell if sex and outcome were completely independent. Large differences between observed and expected frequencies suggest association.
 
 Formula: $E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand Total}}$
@@ -264,7 +264,7 @@ odds_ratio <- odds_discharge_male / odds_discharge_female
 | Females | `r sprintf("%.3f", odds_discharge_female)` |
 | **Odds Ratio (Males/Females)** | **`r sprintf("%.3f", odds_ratio)`** |
 
-:::{.callout-info}
+:::{.callout-note}
 **What This Means**: 
 
 - An **odds of discharge = 2.5** means for every 1 death, there are 2.5 discharges
@@ -275,7 +275,7 @@ odds_ratio <- odds_discharge_male / odds_discharge_female
 
 
 
-::: {.callout-success}
+::: {.callout-tip}
 **Understanding Odds Ratio**:
 - OR = 1: No difference between groups
 - OR > 1: First group has higher odds of the outcome
@@ -344,7 +344,7 @@ Fisher's test is more conservative but provides exact p-values for small samples
 
 Most of the examples in this section require a lot of manual coding and calculations. In R, specialized packages streamline these tasks significantly:
 
-::: {.callout-success}
+::: {.callout-tip}
 **Helpful Packages**:
 - **`epitools`** — Calculate odds ratios and confidence intervals directly from contingency tables
 - **`gtsummary`** — Create publication-ready summary tables and perform chi-squared tests with single-function calls

@@ -19,7 +19,7 @@ These concepts are fundamental to interpreting clinical measurements and study r
 
 ## Setting Up the Environment
 
-::: {.callout-info}
+::: {.callout-tip}
 We'll use the same synthetic platelet dataset from previous chapters. The `dplyr` package will help us with data manipulation. We'll convert the platelet variable to numeric and remove any missing values to ensure clean data for analysis.
 :::
 
@@ -48,9 +48,11 @@ $$\text{Reference Range} = \text{Mean} \pm 1.96 \times \text{SD}$$
 
 This interval contains approximately 95% of individual values in a normally distributed population. A single patient's test result is compared against this range to determine if it's "normal" or abnormal.
 
-::: {.callout-success}
+:::: {.callout-tip}
+
 **Key Distinction**: The reference range is about **individual values**, not the mean. It's wider than a confidence interval because it reflects the natural variability in the population.
-:::
+
+::::
 
 ### Computing the Reference Range
 
@@ -109,7 +111,7 @@ $$
 
 where $\text{SE} = \frac{\text{SD}}{\sqrt{n}}$ (standard error of the mean)
 
-::: {.callout-success}
+::: {.callout-tip}
 **Key Distinction**: The confidence interval is about **where the population mean likely is**, not individual values. It gets narrower as sample size increases because larger samples give more precise estimates.
 :::
 
@@ -144,7 +146,7 @@ cat(sprintf(
 cat(sprintf("95%% CI for the mean: [%.2f, %.2f]\n", ci_low, ci_high))
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 **Interpretation**: Based on our sample of 50 patients, we estimate the true population mean platelet count is between `r sprintf("%.2f", ci_low)` and `r sprintf("%.2f", ci_high)` (10³/µL), with 95% confidence. This tells us how precisely we've estimated the population mean.
 :::
 
@@ -227,7 +229,7 @@ for (i in seq_along(n_vec)) {
 }
 ```
 
-::: {.callout-success}
+::: {.callout-tip}
 **Results Summary**: We've computed sample means and 95% confidence intervals for five different sample sizes: 20, 50, 100, 200, and 400. Notice how the confidence intervals become narrower as n increases.
 :::
 
@@ -287,7 +289,7 @@ legend(
 
 ## Key Takeaways
 
-::: {.callout-warning}
+::: {.callout-note}
 ## Reference Range vs. Confidence Interval
 
 | Concept | Purpose | Based On | Use Case |

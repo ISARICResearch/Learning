@@ -21,7 +21,7 @@ For obvious reasons, we cannot study the entire population, so we rely on sample
 
 When selecting a sample, it is important to ensure that it is representative of the population. This means that the characteristics of the sample should closely match those of the population, allowing for valid generalizations. Various sampling methods can be employed to achieve this, including random, stratified, and cluster sampling.
 
-::: {.callout-info}
+::: {.callout-note}
 
 In this chapter, we focus on populations and samples, representativeness in clinical research, and various sampling methods with their implications for study design and data analysis. We'll use **tidyverse**, a collection of R packages for data manipulation and visualization, including ggplot2, dplyr, tidyr, readr, purrr, and tibble. These packages provide a consistent, user-friendly interface for data work.
 :::
@@ -39,7 +39,7 @@ library(tidyverse, warn.conflicts = FALSE)
 
 ## Loading the Dataset
 
-::: {.callout-success}
+::: {.callout-tip}
 We use a synthetic dataset stored at a public URL. By storing the link as a variable, we make it easier to update or modify the data source in the future. The `read.csv()` function is a base R function that converts a CSV file into a data frame, which is R's standard data structure for tabular data.
 :::
 
@@ -62,7 +62,7 @@ head(df)
 
 ## Exploring Your Dataset
 
-::: {.callout-info}
+::: {.callout-note}
 The output above didn't print nicely because the dataset is too wide for the console. Several functions help with this:
 
 - **`View()`** — Opens data in a separate RStudio tab for scrolling (base R function)
@@ -76,7 +76,7 @@ Try any of these to explore the data more easily.
 
 ## Converting to Tibble Format
 
-::: {.callout-success}
+::: {.callout-tip}
 Tibbles are a modern take on R data frames that provide cleaner, more readable output, especially for wide datasets. The assignment operator `<-` assigns the converted tibble back to the variable `df`.
 :::
 
@@ -97,7 +97,7 @@ Some times, your particular focus will be on a variable, for that reason, you wi
 
 ## Exploring Column Names
 
-::: {.callout-info}
+::: {.callout-note}
 The `colnames()` function returns all variable names in the dataset. You can use the `view()` function (from tidyverse) to explore these names in a more readable format, particularly useful for wide datasets with many variables.
 :::
 
@@ -111,13 +111,13 @@ cnames
 
 ## Focusing on Platelets
 
-:::: {.callout-info}
+:::: {.callout-note}
 Our analysis focuses on the `labs_platelets_103ul` variable, so it's important to examine it closely in the next steps.
 ::::
 
 ## Summarizing the Key Variable
 
-::: {.callout-info}
+::: {.callout-note}
 The `summary()` function provides quick descriptive statistics for the `labs_platelets_103ul` variable, including mean, median, quartiles, and range. This gives us a first look at the variable's distribution and potential data quality issues.
 :::
 
@@ -129,14 +129,14 @@ There are `r nrow(df)` rows in the dataset, which means that there are `r nrow(d
 
 ## Understanding Functions
 
-::: {.callout-success}
+::: {.callout-tip}
 This is a great moment to review how functions work. A function is a **reusable** piece of code that performs a specific task. Instead of writing the same code repeatedly, a function lets you execute it once, then call it many times with different inputs. This makes your code more efficient, maintainable, and less prone to errors.
 :::
 
 
 ## Creating a Reusable Function
 
-::: {.callout-success}
+::: {.callout-tip}
 Functions are reusable pieces of code that perform specific tasks. This `sample_summary()` function computes key statistics (mean, SD, SE, N) for any variable. The `na.omit()` function removes missing values—critical because NAs can distort calculations. Standard error (SE = SD / √n) estimates the variability of the sample mean and is essential for confidence intervals and hypothesis tests.
 :::
 
@@ -158,7 +158,7 @@ sample_summary <- function(x) {
 }
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 The standard error (SE) is calculated as the standard deviation (SD) divided by the square root of the sample size (n). This formula reflects how variability decreases as sample size increases, which is a fundamental concept in statistics.
 
 $$
@@ -167,7 +167,7 @@ $$
 :::
 ## Testing the Function
 
-::: {.callout-info}
+::: {.callout-note}
 We test our `sample_summary()` function with a vector that contains a missing value (NA). This ensures the function correctly handles missing data by omitting it from calculations.
 :::
 
@@ -190,7 +190,7 @@ set.seed(123)
 
 ## Comparing Sampling Methods
 
-:::: {.callout-success}
+:::: {.callout-tip}
 This code applies four different sampling methods to the dataset. Each method has distinct advantages and limitations:
 
 - **Random Sample**: Unbiased, each observation has equal probability
@@ -243,7 +243,7 @@ results
 
 ## Testing the Standard Error of Different Sample Sizes
 
-:::: {.callout-info}
+:::: {.callout-note}
 Standard error decreases as sample size increases, but the relationship is not linear—it follows the formula SE = SD / √n. This section explores how SE varies across different sample sizes, illustrating the principle of diminishing returns: gains in precision become smaller as sample size grows.
 ::::
 
@@ -269,7 +269,7 @@ for (n in sample_sizes) {
 
 ## Results Table
 
-:::: {.callout-success}
+:::: {.callout-tip}
 As sample size increases, standard error decreases, reflecting increased precision in our estimates. However, notice the diminishing returns: the SE decrease from n=10 to n=20 is more substantial than from n=200 to n=500.
 ::::
 

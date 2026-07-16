@@ -1,0 +1,638 @@
+---
+title: "Basic R Programming"
+author: "Introduction to R for Clinical Research"
+format: html
+self-contained: true
+standalone: true
+warnings: false
+---
+
+## Basic R Programming: A Comprehensive Guide
+
+This guide covers fundamental R programming concepts needed for data analysis and statistical computing in clinical research.
+
+## Getting Started with R
+
+### What is R?
+
+R is a free, open-source statistical programming language widely used in data analysis, clinical research, and biostatistics. It excels at:
+- Statistical analysis and modeling
+- Data manipulation and visualization
+- Reproducible research workflows
+- Creating interactive applications
+
+### Installing R and RStudio
+
+:::: {.callout-tip}
+**Quick Setup**: 
+1. Download R from https://www.r-project.org/
+2. Download RStudio from https://posit.co/download/rstudio-desktop/
+3. Install R first, then RStudio
+4. Open RStudio and you're ready to code!
+::::
+
+## Basic Concepts
+
+### Variables and Assignment
+
+The **assignment operator** `<-` stores values in a variable for later use:
+
+```{r}
+# Create variables
+age <- 45
+name <- "Alice"
+height <- 1.72
+
+# View the variable
+age
+```
+
+:::: {.callout-note}
+**Assignment Operator**: Use `<-` or `=` to assign values. Most R programmers prefer `<-` for consistency.
+::::
+
+### Data Types
+
+R has several fundamental data types:
+
+| Type | Example | Description |
+|------|---------|-------------|
+| **Numeric** | `3.14`, `42` | Decimal or whole numbers |
+| **Integer** | `5L`, `10L` | Whole numbers (with L suffix) |
+| **Character** | `"text"`, `"Alice"` | Text strings (in quotes) |
+| **Logical** | `TRUE`, `FALSE` | Boolean values |
+| **NULL** | `NULL` | Empty/undefined value |
+
+```{r}
+# Check data type with class()
+class(3.14)
+class("hello")
+class(TRUE)
+```
+
+### Vectors
+
+A **vector** is a collection of values of the same type. Create vectors with `c()`:
+
+```{r}
+# Numeric vector
+ages <- c(25, 30, 45, 52, 38)
+
+# Character vector
+names <- c("Alice", "Bob", "Carol", "David", "Eve")
+
+# Logical vector
+is_healthy <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
+
+# View the vector
+ages
+```
+
+:::: {.callout-note}
+**Vector Indexing**: Access specific elements using square brackets:
+- `ages[1]` — first element
+- `ages[c(1, 3)]` — first and third elements
+- `ages[-2]` — all except the second element
+::::
+
+```{r}
+# Vector indexing examples
+ages[1] # First element
+ages[c(1, 3)] # First and third
+ages[-2] # All except second
+```
+
+### Data Frames
+
+A **data frame** is a table of data, similar to a spreadsheet. Each column is a vector:
+
+```{r}
+# Create a data frame
+patients <- data.frame(
+  name = c("Alice", "Bob", "Carol"),
+  age = c(45, 52, 38),
+  bp_systolic = c(120, 135, 118)
+)
+
+# View the data frame
+patients
+
+# Access specific column
+patients$name
+
+# Access specific cell
+patients$age[2]
+```
+
+## Operators
+
+### Arithmetic Operators
+
+```{r}
+# Basic math
+5 + 3 # Addition
+10 - 4 # Subtraction
+6 * 7 # Multiplication
+20 / 4 # Division
+2^3 # Exponentiation (2 to the power of 3)
+17 %% 5 # Modulo (remainder: 17 divided by 5 = 3 remainder 2)
+```
+
+### Comparison Operators
+
+```{r}
+# Comparisons return TRUE or FALSE
+5 > 3 # Greater than
+5 < 3 # Less than
+5 == 5 # Equal to
+5 != 3 # Not equal to
+5 >= 5 # Greater than or equal
+5 <= 10 # Less than or equal
+```
+
+### Logical Operators
+
+```{r}
+# Combine multiple conditions
+TRUE & FALSE # AND: both must be TRUE
+TRUE | FALSE # OR: at least one must be TRUE
+!TRUE # NOT: reverses the logical value
+```
+
+## Control Flow
+
+### If/Else Statements
+
+Execute different code based on conditions:
+
+```{r}
+age <- 45
+
+if (age >= 65) {
+  paste("Senior patient")
+} else if (age >= 18) {
+  paste("Adult patient")
+} else {
+  paste("Pediatric patient")
+}
+```
+
+### For Loops
+
+Repeat code a specific number of times:
+
+```{r}
+# Loop through numbers
+for (i in 1:5) {
+  paste(paste("Iteration", i))
+}
+
+# Loop through a vector
+names <- c("Alice", "Bob", "Carol")
+for (name in names) {
+  paste(paste("Hello,", name))
+}
+```
+
+### While Loops
+
+Repeat code while a condition is TRUE:
+
+```{r}
+count <- 1
+while (count <= 3) {
+  paste(paste("Count:", count))
+  count <- count + 1
+}
+```
+
+## Functions: A Comprehensive Guide
+
+### What is a Function?
+
+A **function** is a reusable block of code that performs a specific task. Instead of writing the same code repeatedly, you define it once and call it many times with different inputs.
+
+**Benefits of functions**:
+- **Reduce repetition** — Write once, use many times
+- **Improve readability** — Named functions explain intent
+- **Enable testing** — Easier to verify correctness
+- **Facilitate maintenance** — Update code in one place
+
+### Anatomy of a Function
+
+```{r}
+# Basic function structure
+my_function <- function(argument1, argument2) {
+  # Function body: code that does the work
+  result <- argument1 + argument2
+
+  # Return statement: specify what the function outputs
+  return(result)
+}
+
+# Call the function
+my_function(5, 3)
+```
+
+:::: {.callout-note}
+**Function Components**:
+- **Name**: `my_function` — what you call it
+- **Arguments**: `argument1, argument2` — inputs to the function
+- **Body**: code between `{` and `}` — does the work
+- **Return value**: what the function outputs (last line or `return()`)
+::::
+
+### Simple Example: Calculate BMI
+
+```{r}
+# Function to calculate Body Mass Index
+calculate_bmi <- function(weight_kg, height_m) {
+  # BMI = weight / height^2
+  bmi <- weight_kg / (height_m^2)
+  return(bmi)
+}
+
+# Use the function
+calculate_bmi(70, 1.75)
+calculate_bmi(65, 1.68)
+```
+
+### Functions with Default Arguments
+
+Set default values so arguments are optional:
+
+```{r}
+# Function with default arguments
+greet <- function(name, greeting = "Hello") {
+  paste(greeting, name)
+}
+
+# Call with all arguments
+greet("Alice", "Hi")
+
+# Call with default greeting
+greet("Bob")
+```
+
+### Functions with Multiple Returns
+
+Return multiple values using a list:
+
+```{r}
+# Function returning multiple values
+patient_summary <- function(name, age, bp) {
+  category <- if (age >= 65) "Senior" else "Adult"
+  bp_status <- if (bp >= 140) "High" else "Normal"
+
+  result <- list(
+    name = name,
+    category = category,
+    bp_status = bp_status
+  )
+  return(result)
+}
+
+# Call the function
+summary <- patient_summary("Alice", 72, 145)
+summary$category
+summary$bp_status
+```
+
+### Functions with Variable Arguments
+
+Use `...` to accept any number of arguments:
+
+```{r}
+# Function accepting variable arguments
+sum_all <- function(...) {
+  numbers <- c(...)
+  total <- sum(numbers)
+  return(total)
+}
+
+# Call with different numbers of arguments
+sum_all(5, 10)
+sum_all(5, 10, 15, 20)
+sum_all(2, 4, 6, 8, 10, 12)
+```
+
+:::: {.callout-tip}
+**The `...` (ellipsis)** allows functions to accept any number of arguments. Inside the function, collect them with `c(...)` to convert to a vector.
+::::
+
+### Common Function Patterns in Clinical Research
+
+#### Pattern 1: Data Validation
+
+```{r}
+# Function with input validation
+calculate_dose <- function(weight_kg, drug_dose_per_kg) {
+  # Validate inputs
+  if (weight_kg <= 0) {
+    stop("Weight must be positive")
+  }
+  if (drug_dose_per_kg < 0) {
+    stop("Dose cannot be negative")
+  }
+
+  dose <- weight_kg * drug_dose_per_kg
+  return(dose)
+}
+
+# Valid call
+calculate_dose(70, 0.5)
+
+# Invalid call (will produce an error message)
+# calculate_dose(-70, 0.5)
+```
+
+:::: {.callout-warning}
+**Error Handling**: Use `stop()` to halt function execution with an error message when invalid inputs are detected.
+::::
+
+#### Pattern 2: Summary Statistics
+
+```{r}
+# Function computing multiple statistics
+summarize_lab_values <- function(values) {
+  # Remove missing values
+  clean_values <- na.omit(values)
+
+  # Calculate statistics
+  stats <- list(
+    n = length(clean_values),
+    mean = mean(clean_values),
+    sd = sd(clean_values),
+    min = min(clean_values),
+    max = max(clean_values),
+    median = median(clean_values)
+  )
+
+  return(stats)
+}
+
+# Use the function
+labs <- c(120, 125, 118, 140, 135, NA, 122)
+summarize_lab_values(labs)
+```
+
+#### Pattern 3: Conditional Processing
+
+```{r}
+# Function that behaves differently based on input
+classify_result <- function(value, test_name = "generic") {
+  # Different reference ranges for different tests
+  if (test_name == "glucose") {
+    if (value < 100) {
+      return("Normal")
+    }
+    if (value < 126) {
+      return("Impaired Fasting Glucose")
+    }
+    return("Diabetic")
+  } else if (test_name == "bp_systolic") {
+    if (value < 120) {
+      return("Normal")
+    }
+    if (value < 140) {
+      return("Elevated")
+    }
+    return("High")
+  } else {
+    return("Unknown test")
+  }
+}
+
+# Use the function
+classify_result(115, "glucose")
+classify_result(145, "bp_systolic")
+```
+
+### Scope: Local vs. Global Variables
+
+Variables created inside a function exist only within that function (**local scope**). Variables created outside (**global scope**) are accessible everywhere:
+
+```{r}
+# Global variable
+patient_name <- "Alice"
+
+# Function using global variable
+show_info <- function() {
+  # This works because patient_name is global
+  local_age <- 45
+
+  paste(patient_name, "is", local_age, "years old")
+}
+
+show_info()
+
+# This works
+patient_name
+
+# This fails because local_age only exists inside the function
+# local_age
+```
+
+:::: {.callout-note}
+**Best Practice**: Avoid relying on global variables inside functions. Pass needed values as arguments instead. This makes functions:
+- More reusable
+- Easier to test
+- Less prone to bugs
+::::
+
+### Anonymous Functions
+
+Functions without names, often used with `apply()` functions:
+
+```{r}
+# Calculate BMI for multiple weight-height pairs
+heights <- c(1.65, 1.72, 1.80, 1.58)
+weights <- c(60, 75, 85, 55)
+
+# Using an anonymous function with mapply()
+bmis <- mapply(
+  function(w, h) {
+    w / (h^2)
+  },
+  weights,
+  heights
+)
+bmis
+```
+
+### Built-in Functions You'll Use Often
+
+| Function | Purpose | Example |
+|----------|---------|---------|
+| `mean()` | Average | `mean(c(10, 20, 30))` → 20 |
+| `sd()` | Standard deviation | `sd(c(10, 20, 30))` |
+| `sum()` | Sum values | `sum(c(10, 20, 30))` → 60 |
+| `length()` | Count elements | `length(c(10, 20, 30))` → 3 |
+| `max()` / `min()` | Maximum/minimum | `max(c(10, 20, 30))` → 30 |
+| `paste()` | Combine text | `paste("Age:", 45)` |
+| `c()` | Combine into vector | `c(1, 2, 3)` |
+| `data.frame()` | Create table | `data.frame(name, age)` |
+| `head()` | First n rows | `head(df, 6)` |
+| `summary()` | Quick summary | `summary(df)` |
+
+## Working with Data
+
+### Reading Data
+
+```{r}
+# From CSV file
+df <- read.csv("data.csv")
+
+# From URL
+df <- read.csv("https://example.com/data.csv")
+
+# View first few rows
+head(df)
+```
+
+### Subsetting Data
+
+```{r}
+# Create sample data frame
+patients <- data.frame(
+  name = c("Alice", "Bob", "Carol"),
+  age = c(45, 52, 38),
+  diagnosis = c("HTN", "DM", "HTN")
+)
+
+# Select rows where age > 40
+patients[patients$age > 40, ]
+
+# Select specific columns
+patients[, c("name", "age")]
+
+# Using $ to access columns
+patients$name
+```
+
+### Applying Functions to Data
+
+```{r}
+# Apply a function to each element
+values <- c(10, 20, 30)
+sqrt(values) # Square root of each value
+
+# Apply to each column of a data frame
+apply(patients[, 2:3], 2, mean) # Mean of numeric columns
+```
+
+## Best Practices
+
+:::: {.callout-tip}
+**Function Writing Best Practices**:
+
+1. **Use descriptive names** — `calculate_bmi()` not `calc()`
+2. **Keep functions small** — One task per function
+3. **Document your code** — Add comments explaining logic
+4. **Validate inputs** — Check that arguments make sense
+5. **Return consistent types** — Always return the same data type
+6. **Use meaningful argument names** — `weight_kg` not `w`
+7. **Provide defaults** — When sensible, make arguments optional
+::::
+
+## Putting It All Together: A Clinical Example
+
+```{r}
+# Comprehensive example: Patient risk assessment
+
+# Function to calculate cardiovascular risk score
+assess_cv_risk <- function(age, sbp, ldl, hdl, smoker = FALSE) {
+  # Input validation
+  if (age < 0 | age > 120) {
+    stop("Invalid age")
+  }
+  if (sbp < 50 | sbp > 300) {
+    stop("Invalid blood pressure")
+  }
+
+  # Calculate risk components
+  age_score <- if (age >= 60) {
+    4
+  } else if (age >= 50) {
+    2
+  } else {
+    0
+  }
+  bp_score <- if (sbp >= 140) {
+    4
+  } else if (sbp >= 130) {
+    2
+  } else {
+    0
+  }
+  ldl_score <- if (ldl >= 160) {
+    4
+  } else if (ldl >= 130) {
+    2
+  } else {
+    0
+  }
+  hdl_score <- if (hdl < 40) {
+    3
+  } else if (hdl < 50) {
+    1
+  } else {
+    0
+  }
+  smoke_score <- if (smoker) 4 else 0
+
+  # Total risk score
+  total_score <- age_score + bp_score + ldl_score + hdl_score + smoke_score
+
+  # Classify risk
+  risk_level <- if (total_score >= 12) {
+    "High"
+  } else if (total_score >= 8) {
+    "Moderate"
+  } else {
+    "Low"
+  }
+
+  # Return results as list
+  result <- list(
+    total_score = total_score,
+    risk_level = risk_level,
+    components = list(
+      age = age_score,
+      bp = bp_score,
+      ldl = ldl_score,
+      hdl = hdl_score,
+      smoking = smoke_score
+    )
+  )
+
+  return(result)
+}
+
+# Use the function
+patient1 <- assess_cv_risk(
+  age = 65,
+  sbp = 145,
+  ldl = 150,
+  hdl = 38,
+  smoker = TRUE
+)
+
+patient1$risk_level
+patient1$total_score
+```
+
+## Key Takeaways
+
+1. **Functions are fundamental** to good R programming
+2. **Write functions to avoid repetition** and improve code organization
+3. **Validate inputs** to catch errors early
+4. **Use meaningful names** for functions and arguments
+5. **Return consistent data types** for predictability
+6. **Document your functions** so others (and future you) understand them
+
+## Resources
+
+- [R Official Documentation](https://www.r-project.org/help.html)
+- [R for Data Science](https://r4ds.hadley.nz/)
+- [Advanced R](https://adv-r.hadley.nz/) — deeper dive into R programming

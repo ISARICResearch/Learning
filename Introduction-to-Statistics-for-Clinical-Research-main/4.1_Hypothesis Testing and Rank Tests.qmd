@@ -28,7 +28,7 @@ A **hypothesis test** evaluates evidence against a null hypothesis ($H_0$) using
 
 ## Setting Up the Environment
 
-::: {.callout-info}
+::: {.callout-note}
 We'll analyze whether platelet counts differ between males and females using a two-sample t-test. The t-test is appropriate when comparing the means of two continuous variables across two independent groups.
 :::
 
@@ -50,7 +50,7 @@ paste("Total observations:", nrow(df))
 paste("Variables: Platelets (10³/µL), Sex")
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 **Data Preparation**: We convert platelets to numeric (suppressing warnings) and remove rows with missing values in either platelet count or sex. This ensures clean, complete data for the t-test.
 :::
 
@@ -78,7 +78,7 @@ boxplot(
 grid(nx = NA, ny = NULL, col = "lightgray", lty = 2)
 ```
 
-::: {.callout-success}
+::: {.callout-tip}
 **What to Look For**: 
 - Are the medians (center line) in each box substantially different?
 - Is there overlap in the interquartile ranges (the boxes)?
@@ -133,7 +133,7 @@ The t-test assumes:
 2. **Normality**: Data in each group is approximately normally distributed (t-test is robust to mild violations)
 3. **Equal variances**: Variances are similar between groups (Welch's t-test relaxes this assumption)
 
-::: {.callout-info}
+::: {.callout-note}
 By default, R performs Welch's t-test, which does not assume equal variances. This is generally recommended for real-world data.
 :::
 
@@ -147,7 +147,7 @@ t_test_result <- t.test(group_male, group_female)
 t_test_result
 ```
 
-::: {.callout-info}
+::: {.callout-note}
 **Welch's t-test**: R automatically performs Welch's t-test by default, which does not assume equal variances between groups. This is more robust and generally recommended for real-world data. Use `var.equal = TRUE` only if you have strong evidence of equal variances.
 :::
 
@@ -228,7 +228,7 @@ if (abs(cohens_d) < 0.2) {
 paste(sprintf("Interpretation: %s", interpretation))
 ```
 
-::: {.callout-success}
+::: {.callout-tip}
 **Why Report Effect Size?**: Even with large samples, a statistically significant p-value might reflect a tiny, clinically unimportant difference. Effect size tells us whether the difference is practically meaningful.
 :::
 

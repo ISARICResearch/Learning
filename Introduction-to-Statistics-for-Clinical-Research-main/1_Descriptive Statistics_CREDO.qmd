@@ -1,12 +1,26 @@
 ---
-title: "1_Descriptive Statistics_CREDO"
+title: "Descriptive Statistics"
 format: html
+author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
+self-contained: true
+standalone: true
+warnings: false
+font-size: '14px'
 ---
 
+## Descriptive Statistics
 
+Descriptive statistics provide a summary of the main features of a dataset. They help us understand the characteristics of our data through measures of central tendency, dispersion, and distribution. This guide demonstrates how to compute and visualize descriptive statistics using R.
 
+:::: {.callout-important}
+**Before You Analyze**: Descriptive statistics are the foundation of any data analysis. Spend time understanding your data before running inferential tests. Always check for missing values, outliers, and data quality issues. "Look at your data" is the golden rule of statistics.
+::::
 
 ### BLOCK 0: Helper (pretty separators in the Console)
+
+:::: {.callout-note}
+**Console Output**: We'll use a helper function to create visual separators in the console output, making it easier to track which block of code is running.
+::::
 
 ```{r}
 sep <- function(title) {
@@ -14,18 +28,13 @@ sep <- function(title) {
 }
 ```
 
-
-
-
 ### BLOCK 1: Load packages & dataset
 
-Note: 
-In R, we use packages to extend the functionality of the base R language. The tidyverse is a collection of R packages designed for data science, which includes packages like `dplyr`, `ggplot2`, and `tidyr`. These packages provide tools for data manipulation, visualization, and tidying data. The `gtsummary` package is one such package that provides functions for creating summary tables, including descriptive statistics tables (often referred to as "Table 1" in research papers). 
+:::: {.callout-tip}
+**Why Packages?** In R, we use packages to extend the functionality of the base R language. The tidyverse is a collection of R packages designed for data science, including `dplyr`, `ggplot2`, and `tidyr`. The `gtsummary` package provides functions for creating publication-ready summary tables.
+::::
 
-Below, we will demonstrate how to create a simple descriptive statistics table (Table 1) using the `gtsummary` package. But first, let's understand some basic functions in R that are useful for initial data checks and exploration.
-
-The nrow() function counts the number of rows in a data frame, which is equivalent to the number of observations in the dataset. 
-The ncol() function counts the number of columns in a data frame, which is equivalent to the number of variables in the dataset.
+The `nrow()` function counts the number of rows (observations), and `ncol()` counts the number of columns (variables) in a data frame.
 
 ```{r, warning=FALSE, error=FALSE, message=FALSE}
 sep("BLOCK 1: Load packages & dataset")
@@ -33,25 +42,31 @@ sep("BLOCK 1: Load packages & dataset")
 library(gtsummary)
 library(tidyverse)
 
-
-
-# Read CSV from GitHub or simply, use the `read.csv` function to import a CSV file into R. We can then use the nrow() and ncol() functions to check the number of observations and variables in our dataset, respectively. 
-df <- read.csv("https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv")
-
+df <- read.csv(
+  "https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv"
+)
 
 # Quick preview
-
-
 cat("Rows x Cols:", nrow(df), "x", ncol(df), "\n")
 cat("Some columns:", paste(head(names(df), 10), collapse = ", "), "...\n\n")
-print(head(df[, c("demog_age","dates_admdate","outco_date",
-                  "adsym_fever","comor_hypertensi","demog_sex")], 5))
+head(
+  df[, c(
+    "demog_age",
+    "dates_admdate",
+    "outco_date",
+    "adsym_fever",
+    "comor_hypertensi",
+    "demog_sex"
+  )],
+  5
+)
 ```
 
-
-
 ### BLOCK 2: Clean types & compute length of stay (LOS)
-Sometimes, the variables in a dataset may not be in the correct format for analysis. For example, a variable that should be numeric may be stored as a character or factor. It's important to check the structure of the dataset and convert variables to the appropriate type if necessary. Here, we ensure that the continuous variables (eg. age and length of stay) are numeric and dates are actual dates.
+
+:::: {.callout-warning}
+**Data Cleaning**: Variables may not be in the correct format for analysis. Ensure continuous variables are numeric, dates are properly formatted, and categorical variables are appropriately encoded. This prevents calculation errors later.
+::::
 
 ```{r, warning=FALSE, error=FALSE, message=FALSE}
 
@@ -61,7 +76,7 @@ sep("BLOCK 2: Clean types & compute LOS")
 df$demog_age <- suppressWarnings(as.numeric(df$demog_age))
 
 # Convert date columns to Date objects
-df$outco_date    <- as.Date(df$outco_date,    format = "%Y-%m-%d")
+df$outco_date <- as.Date(df$outco_date, format = "%Y-%m-%d")
 df$dates_admdate <- as.Date(df$dates_admdate, format = "%Y-%m-%d")
 
 # Compute LOS (days)
@@ -69,17 +84,22 @@ df$outco_lengthofstay <- as.numeric(df$outco_date - df$dates_admdate)
 lengthofstay <- df$outco_lengthofstay
 
 # Show quick summaries
-cat("\nSummary: age\n"); print(summary(df$demog_age))
-cat("\nSummary: LOS (days)\n"); print(summary(lengthofstay))
+cat("\nSummary: age\n")
+summary(df$demog_age)
+cat("\nSummary: LOS (days)\n")
+summary(lengthofstay)
 cat("\nMissing LOS count:", sum(is.na(lengthofstay)), "\n")
-
-
 ```
 
-
-
 ### BLOCK 3: Simple visualisations (histograms + boxplot)
-Let's now use some visualisation techniques to explore age and length of stay. We will use histograms and a boxplot. 
+
+:::: {.callout-tip}
+**Exploratory Data Analysis**: Visualizations help identify data distribution, outliers, and patterns. Histograms show the shape of distributions, while boxplots display central tendency and spread at a glance.
+::::
+
+:::: {.callout-warning}
+**Outlier Detection**: Pay attention to extreme values in histograms and boxplots. Outliers may represent data entry errors, genuine rare events, or patients with unusual characteristics that warrant separate analysis or clinical review.
+::::
 
 ```{r, warning=FALSE, error=FALSE, message=FALSE}
 sep("BLOCK 3: Simple visualisations")
@@ -88,19 +108,21 @@ sep("BLOCK 3: Simple visualisations")
 op <- par(mfrow = c(2, 1))
 hist(df$demog_age, breaks = 30, main = "Age distribution", xlab = "Age (years)")
 hist(lengthofstay, breaks = 30, main = "Length of stay", xlab = "Days")
-par(op)  # reset layout
+par(op) # reset layout
 
 # Boxplot of LOS
-boxplot(lengthofstay,
-        ylab = "Length of stay (days)",
-        main = "Boxplot of LOS")
-
+boxplot(lengthofstay, ylab = "Length of stay (days)", main = "Boxplot of LOS")
 ```
 
-
-
 ### BLOCK 4: Bar plot — fever by sex (stacked %)
-We can also combine and visualise two variables at a go. For example, we can visualise the distribution of fever on admission by sex. 
+
+:::: {.callout-note}
+**Bivariate Analysis**: Combining two variables helps identify associations. Here we visualize fever prevalence by sex using proportions rather than raw counts, making comparisons easier across groups of different sizes.
+::::
+
+:::: {.callout-important}
+**Proportions vs. Counts**: When comparing categorical variables across groups of different sizes, always report proportions or percentages. Raw counts can be misleading if one group is much larger than the other. For example, 50 cases out of 100 (50%) is proportionally the same as 100 cases out of 200 (50%), but reporting only raw counts (50 vs. 100) might suggest a difference that isn't there.
+::::
 
 ```{r, warning=FALSE, error=FALSE, message=FALSE}
 sep("BLOCK 4: Fever by sex (stacked %)")
@@ -113,10 +135,11 @@ tab <- table(df_clean$demog_sex, df_clean$adsym_fever)
 
 # Convert to within-sex proportions (percent)
 prop_tab <- round(100 * prop.table(tab, margin = 1), 1)
-cat("\nProportions of fever by sex (%):\n"); print(prop_tab)
+cat("\nProportions of fever by sex (%):\n")
+prop_tab
 
 # Stacked barplot of proportions
-op <- par(mar = c(5, 4, 4, 6))  # room for legend on the right
+op <- par(mar = c(5, 4, 4, 6)) # room for legend on the right
 bp <- barplot(
   t(prop_tab),
   beside = FALSE,
@@ -130,77 +153,112 @@ bp <- barplot(
 # Add % labels inside bars
 lbl_mat <- t(prop_tab)
 y_mid <- apply(lbl_mat, 2, cumsum) - 0.5 * lbl_mat
-text(x = rep(bp, each = nrow(lbl_mat)), y = as.vector(y_mid),
-     labels = paste0(as.vector(lbl_mat), "%"))
+text(
+  x = rep(bp, each = nrow(lbl_mat)),
+  y = as.vector(y_mid),
+  labels = paste0(as.vector(lbl_mat), "%")
+)
 
-legend("topright", inset = c(-0.25,0),
-       legend = colnames(prop_tab),  # fever categories
-       fill = c("lightblue","tomato"),
-       xpd = TRUE, bty = "n")
+legend(
+  "topright",
+  inset = c(-0.25, 0),
+  legend = colnames(prop_tab), # fever categories
+  fill = c("lightblue", "tomato"),
+  xpd = TRUE,
+  bty = "n"
+)
 par(op)
-
 ```
 
-
-
 ### BLOCK 5: Create cleaned dataset for descriptive table
-Sometimes, we may want to subset our data to include only certain variables of interest. For example, we may want to focus on demographic and clinical variables that are relevant to our analysis. In this case, we will create a new data frame called `df_subset` that includes only the variables we are interested in.
+
+:::: {.callout-tip}
+**Data Subsetting**: Select only variables relevant to your analysis. This improves code clarity, reduces errors from unused data, and makes the dataset more manageable for summary table creation.
+::::
+
+:::: {.callout-warning}
+**Complete Case Analysis**: Removing rows with any missing values can substantially reduce your sample size and may introduce bias if data are not missing at random (MCAR). Always report how many observations were excluded and compare characteristics of included vs. excluded patients to assess for potential selection bias.
+::::
 
 ```{r, warning=FALSE, error=FALSE, message=FALSE}
 sep("BLOCK 5: Create cleaned dataset for descriptive table")
 
 # Keep only variables of interest
-keep_vars <- c("demog_age", "outco_lengthofstay",
-               "adsym_fever", "comor_hypertensi", "demog_sex")
+keep_vars <- c(
+  "demog_age",
+  "outco_lengthofstay",
+  "adsym_fever",
+  "comor_hypertensi",
+  "demog_sex"
+)
 df_subset <- df[, keep_vars]
 
 # Helper to convert text to TRUE/FALSE, keep NA otherwise
-to_logical <- function(x) ifelse(x %in% c("True","true"), TRUE,
-                           ifelse(x %in% c("False","false"), FALSE, NA))
+to_logical <- function(x) {
+  ifelse(
+    x %in% c("True", "true"),
+    TRUE,
+    ifelse(x %in% c("False", "false"), FALSE, NA)
+  )
+}
 
 # Recode binary-like text
-df_subset$adsym_fever      <- to_logical(df_subset$adsym_fever)
+df_subset$adsym_fever <- to_logical(df_subset$adsym_fever)
 df_subset$comor_hypertensi <- to_logical(df_subset$comor_hypertensi)
 
 # Ensure numeric for continuous
 df_subset$demog_age <- suppressWarnings(as.numeric(df_subset$demog_age))
-df_subset$outco_lengthofstay <- suppressWarnings(as.numeric(df_subset$outco_lengthofstay))
+df_subset$outco_lengthofstay <- suppressWarnings(as.numeric(
+  df_subset$outco_lengthofstay
+))
 
 # Drop rows with missing values in key fields
 df_subset <- subset(
   df_subset,
-  !is.na(demog_age) & !is.na(outco_lengthofstay) &
-  !is.na(adsym_fever) & !is.na(comor_hypertensi) &
-  demog_sex != ""
+  !is.na(demog_age) &
+    !is.na(outco_lengthofstay) &
+    !is.na(adsym_fever) &
+    !is.na(comor_hypertensi) &
+    demog_sex != ""
 )
 
 # Tidy sex as factor
 df_subset$demog_sex <- factor(df_subset$demog_sex)
 
 # Preview and size
-cat("\nCleaned dataset preview:\n"); print(head(df_subset, 6))
-cat("\nCleaned dataset dims (rows, cols):", dim(df_subset)[1], dim(df_subset)[2], "\n")
-
+cat("\nCleaned dataset preview:\n")
+head(df_subset, 6)
+cat(
+  "\nCleaned dataset dims (rows, cols):",
+  dim(df_subset)[1],
+  dim(df_subset)[2],
+  "\n"
+)
 ```
 
-
-
 ### BLOCK 6: Build a simple descriptive "Table 1"
+
+:::: {.callout-note}
+**Summary Statistics Format**: Continuous variables are typically reported as median (IQR) with sample size. Binary/categorical variables are reported as count and percentage. This format is standard in clinical research Table 1 presentations.
+::::
+
+:::: {.callout-important}
+**Choosing Central Tendency**: Use **mean ± SD** when data are normally distributed (symmetric, no extreme outliers). Use **median (IQR)** when data are skewed or contain outliers. Always inspect visualizations before choosing—the median is more robust to outliers and is preferred for most clinical outcomes.
+::::
 
 ```{r}
 sep("BLOCK 6: Descriptive table (Table 1-style)")
 
 cont_vars <- c("demog_age", "outco_lengthofstay")
-bin_vars  <- c("adsym_fever", "comor_hypertensi")
-
+bin_vars <- c("adsym_fever", "comor_hypertensi")
 
 # Groups: overall + by sex
 groups <- c("All", levels(df_subset$demog_sex))
 
 descriptive_table <- data.frame(
   Variable = character(),
-  Group    = character(),
-  Summary  = character(),
+  Group = character(),
+  Summary = character(),
   stringsAsFactors = FALSE
 )
 
@@ -212,34 +270,38 @@ for (g in groups) {
     x <- dat[[v]]
     x <- x[is.finite(x)]
     med <- median(x, na.rm = TRUE)
-    q1  <- quantile(x, 0.25, na.rm = TRUE)
-    q3  <- quantile(x, 0.75, na.rm = TRUE)
-    n   <- length(x)
-    descriptive_table <- rbind(descriptive_table, data.frame(
-      Variable = v,
-      Group    = g,
-      Summary  = sprintf("%.1f (%.1f–%.1f) | %d", med, q1, q3, n),
-      stringsAsFactors = FALSE
-    ))
+    q1 <- quantile(x, 0.25, na.rm = TRUE)
+    q3 <- quantile(x, 0.75, na.rm = TRUE)
+    n <- length(x)
+    descriptive_table <- rbind(
+      descriptive_table,
+      data.frame(
+        Variable = v,
+        Group = g,
+        Summary = sprintf("%.1f (%.1f–%.1f) | %d", med, q1, q3, n),
+        stringsAsFactors = FALSE
+      )
+    )
   }
 
   # Binary: count (%) | n
   for (v in bin_vars) {
     x <- dat[[v]]
     x <- x[!is.na(x)]
-    n_yes    <- sum(x == TRUE)
+    n_yes <- sum(x == TRUE)
     prop_yes <- 100 * mean(x == TRUE)
-    n_total  <- length(x)
-    descriptive_table <- rbind(descriptive_table, data.frame(
-      Variable = v,
-      Group    = g,
-      Summary  = sprintf("%d (%.1f%%) | %d", n_yes, prop_yes, n_total),
-      stringsAsFactors = FALSE
-    ))
+    n_total <- length(x)
+    descriptive_table <- rbind(
+      descriptive_table,
+      data.frame(
+        Variable = v,
+        Group = g,
+        Summary = sprintf("%d (%.1f%%) | %d", n_yes, prop_yes, n_total),
+        stringsAsFactors = FALSE
+      )
+    )
   }
 }
-
-
 
 # Markers (~ for continuous, * for binary)
 descriptive_table$Variable <- ifelse(
@@ -251,71 +313,83 @@ descriptive_table$Variable <- ifelse(
 # Reshape to wide format (Table 1 style)
 table_wide <- reshape(
   descriptive_table,
-  idvar    = "Variable",
-  timevar  = "Group",
+  idvar = "Variable",
+  timevar = "Group",
   direction = "wide"
 )
-
 
 # Clean column names and print
 names(table_wide) <- sub("^Summary\\.", "", names(table_wide))
 cat("\nDescriptive table (wide):\n")
 print(table_wide, row.names = FALSE)
-
 ```
 
+### Bonus: Publication-Ready Summary Table with gtsummary
 
+:::: {.callout-tip}
+**Publication Ready**: The `gtsummary` package creates beautifully formatted summary tables suitable for research papers. The `tbl_summary()` function allows customization of labels, statistics, and decimal formatting.
+::::
 
-### Bonus
-We can also use the tbl_summary() function from the gtsummary package to generate a nicer "publication-ready" table. The tbl_summary() function allows us to create summary tables with customizable labels, statistics, and formatting options. 
+:::: {.callout-note}
+**Stratification by Sex**: Reporting descriptive statistics overall and stratified by demographic subgroups (e.g., sex) helps readers assess whether characteristics are balanced and allows readers to identify patterns or disparities. Always compare baseline characteristics across groups to check for potential confounding.
+::::
 
-But first, let us try to categorise the age variable into age groups. We will create a new variable called "age_category" that categorizes age into: "< 20", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", and "80+". We will use the `mutate` to first create a new variable "age_category", and then proceed to use `case_when` function to create these age categories. The resulting dataset will be called "df_subset_cleaned". We will then use the data set "df_subset_cleaned" to create our formatted summary table. 
+First, let's create age categories to make the age variable more interpretable in the summary table:
 
 ```{r}
-
-df_subset_cleaned <- df_subset %>% 
+df_subset_cleaned <- df_subset %>%
   mutate(
     age_category = case_when(
-      demog_age  < 20 ~ "<20 year",
-      demog_age  >= 20 & demog_age < 30 ~ "20-29 years",
-      demog_age  >= 30 & demog_age < 40 ~ "30-39 years",
-      demog_age  >= 40 & demog_age < 50 ~ "40-49 years",
-      demog_age  >= 50 & demog_age < 60 ~ "50-59 years",
-      demog_age  >= 60 & demog_age < 70 ~ "60-69 years",
-      demog_age  >= 70 & demog_age < 80 ~ "70-79 years",
-      demog_age  >= 80  ~ "80+ years",
-      TRUE ~ NA_character_ 
+      demog_age < 20 ~ "<20 year",
+      demog_age >= 20 & demog_age < 30 ~ "20-29 years",
+      demog_age >= 30 & demog_age < 40 ~ "30-39 years",
+      demog_age >= 40 & demog_age < 50 ~ "40-49 years",
+      demog_age >= 50 & demog_age < 60 ~ "50-59 years",
+      demog_age >= 60 & demog_age < 70 ~ "60-69 years",
+      demog_age >= 70 & demog_age < 80 ~ "70-79 years",
+      demog_age >= 80 ~ "80+ years",
+      TRUE ~ NA_character_
     )
   )
 
-
-
-# The code below gives us the raw variable names in the summary table. 
-
-df_subset_cleaned %>% 
-  dplyr::select(demog_age, age_category, demog_sex, adsym_fever, comor_hypertensi) %>% 
+# Basic summary table with raw variable names
+df_subset_cleaned %>%
+  dplyr::select(
+    demog_age,
+    age_category,
+    demog_sex,
+    adsym_fever,
+    comor_hypertensi
+  ) %>%
   tbl_summary()
+```
 
+Now let's create a polished version with custom labels and formatting:
 
-# We can clean this up by indicating better labels for each variable within the tbl_summary() function. We wil do this by calling the "labels" argument and listing our variables and our preferred labels. We can also make the decimal point consistent for all the percentages reported (for e.g., 1 decimal place).
-
-df_subset_cleaned %>% 
-  dplyr::select(demog_age, age_category, demog_sex, adsym_fever, comor_hypertensi, outco_lengthofstay) %>% 
+```{r}
+df_subset_cleaned %>%
+  dplyr::select(
+    demog_age,
+    age_category,
+    demog_sex,
+    adsym_fever,
+    comor_hypertensi,
+    outco_lengthofstay
+  ) %>%
   tbl_summary(
-    # The label argument helps us specify the actual variable labels we want to see in the final table.
     label = list(
-      demog_age ~ "Age, years", 
-      age_category ~ "Age category", 
-      demog_sex ~ "Sex", 
-      adsym_fever ~ "Fever on admission", 
+      demog_age ~ "Age, years",
+      age_category ~ "Age category",
+      demog_sex ~ "Sex",
+      adsym_fever ~ "Fever on admission",
       comor_hypertensi ~ "Hypertension",
       outco_lengthofstay ~ "Length of stay"
-    ), 
-    digits = all_categorical() ~ c(0, 1) # We have specified that for all categorical variables, the first number (count) should have 0 decimal places, and the percentage(%) should have 1 decimal place. 
-  ) %>% 
-  bold_labels() # We can further use this to bolden the variable labels. 
-
+    ),
+    digits = all_categorical() ~ c(0, 1)
+  ) %>%
+  bold_labels()
 ```
+
 
 
 

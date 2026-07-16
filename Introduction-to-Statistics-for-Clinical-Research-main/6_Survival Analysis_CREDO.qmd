@@ -1,10 +1,17 @@
 ---
 title: "6_Survival Analysis_CREDO"
 format: html
+author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
+self-contained: true
+standalone: true
+warnings: false
+font-size: '14px'
 ---
 
+## Survival Analysis
 
-### Intro to Survival Analysis
+### Introduction to Survival Analysis
+
 Survival analysis is a set of statistical methods used to study the time until an event occurs. In medical research, the event is often death, but it could also be recovery, disease recurrence, or hospital discharge.
 
 Unlike other statistical methods, survival analysis takes into account not only whether an event occurred, but also when (i.e., time) it occurred. This makes it particularly useful for studies where participants are followed over time.
@@ -23,18 +30,34 @@ For every patient, we record:
 These data can be used to estimate the probability that they survived over time, or even compare survival between different groups. 
 Let's load our data and see how to do this in R.
 
-### Loading packages and importing data
+:::: {.callout-important}
+**Key Concept: Censoring**: In survival analysis, "censoring" occurs when we don't know the final outcome for a patient. For example, if a patient is still alive when the study ends, we say they are "censored"—we know they survived at least until the study end date, but not whether they would have survived longer. Proper handling of censored observations is crucial for valid survival analysis.
+::::
+
+### Loading Packages and Importing Data
+
+:::: {.callout-note}
+**Data Preparation for Survival Analysis**: Survival analysis requires three key pieces of information: 
+
+1. A start time or time of entry into the study
+2. Time to event or last follow-up
+3. An event indicator (whether the event occurred or the patient was censored)
+
+Always verify these variables are correctly formatted before fitting survival models.
+::::
 
 ```{r}
 # --- Packages
 library(survival)
 
 # --- Load data (your base)
-df <- read.csv("https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv")
+df <- read.csv(
+  "https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv"
+)
 
 # Convert types
-df$demog_age     <- suppressWarnings(as.numeric(df$demog_age))
-df$outco_date    <- as.Date(df$outco_date,    format = "%Y-%m-%d")
+df$demog_age <- suppressWarnings(as.numeric(df$demog_age))
+df$outco_date <- as.Date(df$outco_date, format = "%Y-%m-%d")
 df$dates_admdate <- as.Date(df$dates_admdate, format = "%Y-%m-%d")
 
 # Length of stay (days) from admission to outcome date
@@ -46,31 +69,39 @@ df$outco_binary_outcome <- ifelse(df$outco_binary_outcome == "Death", 1L, 0L)
 # --- Prepare analysis dataset
 df_km <- subset(
   df,
-  is.finite(outco_lengthofstay) & outco_lengthofstay >= 0 & !is.na(outco_binary_outcome)
+  is.finite(outco_lengthofstay) &
+    outco_lengthofstay >= 0 &
+    !is.na(outco_binary_outcome)
 )
 
 # Time and event
-df_km$time  <- df_km$outco_lengthofstay
+df_km$time <- df_km$outco_lengthofstay
 df_km$event <- df_km$outco_binary_outcome
 
 # (Optional) nudge zero-length times for plotting stability
 df_km$time[df_km$time == 0] <- 0.5
-
-
 ```
 
 
 
 ### Kaplan-Meier Survival Curves
 
-The Kaplan–Meier method is used to estimate the probability of surviving over time.
+:::: {.callout-tip}
+**The Kaplan-Meier Method**: This is a non-parametric estimator of the survival function. It makes minimal assumptions about the distribution of survival times, making it widely applicable. Key features:
+- Starts at 100% survival at time 0
+- Steps downward at each observed event time
+- Accounts for censored observations at each time step
+- The survival curve shows the cumulative probability of surviving beyond time t
+::::
 
-Rather than giving a single percentage, it produces a survival curve, showing how the proportion of surviving patients changes throughout the follow-up period.
+The Kaplan–Meier method is used to estimate the probability of surviving over time. Rather than giving a single percentage, it produces a survival curve, showing how the proportion of surviving patients changes throughout the follow-up period.
 
-NB: The curve starts at exactly 100% survival at the beginning of the study and steps downward whenever a death occurs.
+**Key characteristics:**
+- The curve starts at exactly 100% survival at the beginning of the study and steps downward whenever a death occurs.
+- Confidence intervals (shaded bands) reflect uncertainty in survival estimates
+- Marks on the curve show times when events (deaths) occurred
 
 A Kaplan–Meier curve can answer questions such as:
-
 - What proportion of patients are alive after x number of days?
 - How does survival change over one year?
 - At what point do deaths occur most frequently?
@@ -79,34 +110,45 @@ A Kaplan–Meier curve can answer questions such as:
 # --- OVERALL Kaplan–Meier
 fit_all <- survfit(Surv(time, event) ~ 1, data = df_km)
 
-plot(fit_all,
-     xlab = "Days since admission",
-     ylab = "In-hospital survival probability",
-     main = "In-hospital Survival (Kaplan–Meier)",
-     conf.int = TRUE,
-     mark.time = TRUE)
+plot(
+  fit_all,
+  xlab = "Days since admission",
+  ylab = "In-hospital survival probability",
+  main = "In-hospital Survival (Kaplan–Meier)",
+  conf.int = TRUE,
+  mark.time = TRUE
+)
 
 
-
-# We can also use the ggsurvfit package for a more polished plot. 
+# We can also use the ggsurvfit package for a more polished plot.
 library(ggsurvfit)
 
 ggsurvfit(fit_all) +
-  labs(title = "In-hospital Survival (Kaplan–Meier)",
-       x = "Days since admission",
-       y = "In-hospital survival probability") +
-  add_confidence_interval()+
+  labs(
+    title = "In-hospital Survival (Kaplan–Meier)",
+    x = "Days since admission",
+    y = "In-hospital survival probability"
+  ) +
+  add_confidence_interval() +
   theme_bw() +
   theme(panel.grid = element_blank())
 ```
 
 
 
-# Log-rank tests
+# Log-Rank Test
 
-The log-rank test compares the survival experiences of two or more groups. It asks a simple question: "Are the differences between these survival curves greater than would be expected by chance?"
+:::: {.callout-important}
+**Comparing Survival Curves**: The log-rank test answers the question: "Are the differences in survival between groups greater than would be expected by chance?" It is a hypothesis test with:
+- **Null hypothesis**: The two groups have identical survival distributions
+- **Test statistic**: Compares observed vs. expected number of events in each group
+- **Assumption**: Non-informative censoring (probability of censoring doesn't depend on survival risk)
+- **Limitation**: Tests for any difference in survival patterns but doesn't quantify the size of the difference or account for confounding by other variables
+::::
 
-NB: The log-rank test compares overall survival patterns but does not estimate the size of the difference or account for other patient characteristics.
+The log-rank test compares the survival experiences of two or more groups. It asks: "Are the differences between these survival curves greater than would be expected by chance?"
+
+**Important note**: The log-rank test compares overall survival patterns but does not estimate the size of the difference or account for other patient characteristics. For that, we use Cox regression (shown later).
 
 ```{r}
 # --- BY-SEX Kaplan–Meier (colored) + log-rank
@@ -124,64 +166,82 @@ cols <- c("Male" = "steelblue", "Female" = "tomato")
 
 # NB: the plot and legend have to be run together to ensure the colors match the curves.
 
-plot(fit_sex,
-     xlab = "Days since admission",
-     ylab = "In-hospital survival probability",
-     main = "In-hospital Survival by Sex (Kaplan–Meier)",
-     conf.int = FALSE,   # set TRUE if you want per-curve CIs
-     lwd = 2,
-     mark.time = TRUE,
-     col = cols[levels(df_km_sex$demog_sex)])
+plot(
+  fit_sex,
+  xlab = "Days since admission",
+  ylab = "In-hospital survival probability",
+  main = "In-hospital Survival by Sex (Kaplan–Meier)",
+  conf.int = FALSE, # set TRUE if you want per-curve CIs
+  lwd = 2,
+  mark.time = TRUE,
+  col = cols[levels(df_km_sex$demog_sex)]
+)
 
-legend("bottomleft",
-       legend = names(cols),
-       col = unname(cols),
-       lwd = 2, bty = "n",
-       title = "Sex")
-
+legend(
+  "bottomleft",
+  legend = names(cols),
+  col = unname(cols),
+  lwd = 2,
+  bty = "n",
+  title = "Sex"
+)
 
 
 # Log-rank test
-# This test compares the survival distributions of the two groups (sex). 
+# This test compares the survival distributions of the two groups (sex).
 
 logrank <- survdiff(Surv(time, event) ~ demog_sex, data = df_km_sex)
 print(logrank)
-
 ```
 
 
 
-### Bonus
-We can still use the `ggsurvfit` package for a more polished plot.
+### Bonus: Publication-Ready Survival Plots with ggsurvfit
+
+We can use the `ggsurvfit` package for a more polished, publication-ready plot.
 ```{r}
 ggsurvfit(fit_sex) +
-  labs(title = "In-hospital Survival by Sex (Kaplan–Meier)",
-       x = "Days since admission",
-       y = "In-hospital survival probability") +
-  add_confidence_interval()+
+  labs(
+    title = "In-hospital Survival by Sex (Kaplan–Meier)",
+    x = "Days since admission",
+    y = "In-hospital survival probability"
+  ) +
+  add_confidence_interval() +
   theme_bw() +
   scale_color_manual(values = cols) +
-  theme(legend.title = element_text(size = 10),
-        legend.text = element_text(size = 9), 
-        legend.position = "right",
-        panel.grid = element_blank())
-
+  theme(
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9),
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
 ```
 
 
 
-### Intro to Cox Proportional Hazards Regression
+### Introduction to Cox Proportional Hazards Regression
+
+:::: {.callout-tip}
+**Hazard Ratio Interpretation**: The hazard ratio (HR) is the key result from Cox regression. It compares the instantaneous risk of the event between groups:
+- **HR = 1.0**: No difference in risk between groups
+- **HR > 1.0**: Higher risk of the event (e.g., HR = 2.0 means twice the hazard/risk)
+- **HR < 1.0**: Lower risk of the event (protective effect; e.g., HR = 0.5 means half the hazard)
+- **95% CI**: If the CI includes 1.0, the difference is not statistically significant at α = 0.05
+::::
 
 Cox proportional hazards regression is used to investigate how one or more factors influence the risk of death over time.
 
-Unlike the Kaplan–Meier method, the Cox model can examine several variables simultaneously. For instance, we may wish to determine whether survival is associated with age, sex, comorbidity, etc. while adjusting for the effects of the other variables.
+**Advantages over Kaplan-Meier:**
+- Can examine several variables simultaneously
+- Estimates the size and direction of associations (hazard ratios)
+- Can adjust for confounding by other variables
+- Models the instantaneous risk of death over time
 
-The main result (estimate) from a Cox model is the hazard ratio (HR).
-The HR compares the risk of death between groups. Typically:
+For instance, we may wish to determine whether survival is associated with age, sex, comorbidity, etc. while adjusting for the effects of the other variables.
 
-HR = 1.0 indicates no difference in risk.
-HR > 1.0 indicates a higher risk of death.
-HR < 1.0 indicates a lower risk of death.
+The main result (estimate) from a Cox model is the **hazard ratio (HR)**, which compares the risk of death between groups.
+
+### Univariable Cox Regression Models
 
 ```{r}
 
@@ -192,16 +252,33 @@ summary(cox_age_only)
 cox_sex_only <- coxph(Surv(time, event) ~ demog_sex, data = df_km_sex)
 summary(cox_sex_only)
 
-cox_hypertension_only <- coxph(Surv(time, event) ~ comor_hypertensi, data = df_km_sex)
+cox_hypertension_only <- coxph(
+  Surv(time, event) ~ comor_hypertensi,
+  data = df_km_sex
+)
 summary(cox_hypertension_only)
-
 ```
 
+:::: {.callout-note}
+**Univariable vs. Multivariable Models**: These univariable models examine each predictor in isolation. However, they may be biased if predictors are correlated with each other. For example, if age and hypertension are correlated, the age effect in the univariable model may actually reflect hypertension status. Multivariable models (shown next) adjust for these confounders.
+::::
 
-### Now, let's do a multivariable Cox regression including age, sex, and hypertension
+
+### Multivariable Cox Proportional Hazards Regression
+
+:::: {.callout-important}
+**Multivariable Adjustment**: The multivariable Cox model simultaneously evaluates multiple predictors while adjusting for confounding. The hazard ratios represent the effect of each predictor *holding other variables constant*. This approach:
+- Reduces confounding bias from correlated predictors
+- Tests associations while controlling for other factors
+- Allows comparison of relative importance of different variables
+- Still assumes proportional hazards (check this with diagnostics; not shown here)
+::::
 
 ```{r}
-multivar_model <- coxph(Surv(time, event) ~ demog_age + demog_sex + comor_hypertensi, data = df_km_sex)
+multivar_model <- coxph(
+  Surv(time, event) ~ demog_age + demog_sex + comor_hypertensi,
+  data = df_km_sex
+)
 
 
 summary(multivar_model)
@@ -210,22 +287,29 @@ summary(multivar_model)
 # Alternatively, we can present this using a nicer table using the `gtsummary` package.
 library(gtsummary)
 
-  tbl_regression(
-    multivar_model,
-    exponentiate = TRUE, 
-    label = list(
-      demog_age ~ "Age (years)",
-      demog_sex ~ "Sex", 
-      comor_hypertensi ~ "Hypertension"
-    )) %>%
+tbl_regression(
+  multivar_model,
+  exponentiate = TRUE,
+  label = list(
+    demog_age ~ "Age (years)",
+    demog_sex ~ "Sex",
+    comor_hypertensi ~ "Hypertension"
+  )
+) %>%
   as_gt() %>%
   gt::tab_header(
     title = "Multivariable Cox Proportional Hazards Model"
   )
-
 ```
 
-
+:::: {.callout-tip}
+**Reading Cox Model Output**:
+- **Estimate (log hazard)**: The coefficient from the model (on log scale); positive values indicate increased hazard
+- **Hazard Ratio (exp(coef))**: Exponentiated coefficient (reported when `exponentiate = TRUE`); easier to interpret clinically
+- **95% Confidence Interval**: Range of plausible hazard ratio values; narrow CIs indicate precise estimates, wide CIs indicate uncertainty
+- **p-value**: Tests whether the association is statistically significantly different from HR = 1.0
+- **Compare univariable to multivariable**: Changes in hazard ratios between models suggest confounding by the added variables
+::::
 
 
 
