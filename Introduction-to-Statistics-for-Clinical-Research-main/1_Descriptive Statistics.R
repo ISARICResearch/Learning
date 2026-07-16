@@ -142,6 +142,11 @@ sep("BLOCK 6: Descriptive table (Table 1-style)")
 cont_vars <- c("demog_age", "outco_lengthofstay")
 bin_vars  <- c("adsym_fever", "comor_hypertensi")
 
+
+df_subset
+
+
+
 # Groups: overall + by sex
 groups <- c("All", levels(df_subset$demog_sex))
 
@@ -187,6 +192,7 @@ for (g in groups) {
   }
 }
 
+
 # Markers (~ for continuous, * for binary)
 descriptive_table$Variable <- ifelse(
   descriptive_table$Variable %in% cont_vars,
@@ -206,3 +212,7 @@ table_wide <- reshape(
 names(table_wide) <- sub("^Summary\\.", "", names(table_wide))
 cat("\nDescriptive table (wide):\n")
 print(table_wide, row.names = FALSE)
+
+
+summary(df_subset$demog_age)
+

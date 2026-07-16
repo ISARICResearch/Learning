@@ -17,7 +17,7 @@ Heavy maths are intentionally kept light; the emphasis is on *how to apply* and 
 3. **Probability and Confidence Intervals** — reference ranges vs CIs, precision and uncertainty.  
 4. **Hypothesis Testing and Rank Tests** — t-tests, χ², Wilcoxon/Mann–Whitney, interpretation.  
 5. **Linear and Logistic Regression** — effect estimates, assumptions, model fit, odds ratios.  
-6. **Survival Analysis** — censoring, Kaplan–Meier, log-rank, intro to Cox PH.
+6. **Survival Analysis** — censoring, Kaplan–Meier survival curves, log-rank test, intro to Cox Proportional Hazards Regression.
 
 ## Getting started
 
