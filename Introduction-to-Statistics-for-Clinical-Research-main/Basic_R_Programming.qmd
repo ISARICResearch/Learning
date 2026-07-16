@@ -440,26 +440,6 @@ patient_name
 - Less prone to bugs
 ::::
 
-### Anonymous Functions
-
-Functions without names, often used with `apply()` functions:
-
-```{r}
-# Calculate BMI for multiple weight-height pairs
-heights <- c(1.65, 1.72, 1.80, 1.58)
-weights <- c(60, 75, 85, 55)
-
-# Using an anonymous function with mapply()
-bmis <- mapply(
-  function(w, h) {
-    w / (h^2)
-  },
-  weights,
-  heights
-)
-bmis
-```
-
 ### Built-in Functions You'll Use Often
 
 | Function | Purpose | Example |
@@ -479,16 +459,16 @@ bmis
 
 ### Reading Data
 
-```{r}
-# From CSV file
+::: {.callout-note}
+From CSV file: 
 df <- read.csv("data.csv")
 
-# From URL
+From URL:
 df <- read.csv("https://example.com/data.csv")
 
-# View first few rows
+View first few rows:
 head(df)
-```
+:::
 
 ### Subsetting Data
 
@@ -510,16 +490,19 @@ patients[, c("name", "age")]
 patients$name
 ```
 
-### Applying Functions to Data
+### Vectorization: Functions Work on Vectors
+
+Most R functions are **vectorized** — they automatically apply to each element in a vector:
 
 ```{r}
-# Apply a function to each element
+# Apply a function to each element of a vector
 values <- c(10, 20, 30)
 sqrt(values) # Square root of each value
-
-# Apply to each column of a data frame
-apply(patients[, 2:3], 2, mean) # Mean of numeric columns
 ```
+
+:::: {.callout-tip}
+**Vectorization** is one of R's most powerful features. Instead of looping through each element, you apply a function directly to a vector and it automatically processes all elements. This is faster and cleaner code.
+::::
 
 ## Best Practices
 
