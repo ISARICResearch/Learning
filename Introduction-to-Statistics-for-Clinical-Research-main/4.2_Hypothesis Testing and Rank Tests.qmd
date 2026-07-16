@@ -1,0 +1,388 @@
+---
+title: "Hypothesis Testing: Comparing Categorical Variables"
+author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
+format: html
+self-contained: true
+standalone: true
+warnings: false
+font-size: '14px'
+---
+
+## Hypothesis Testing: Comparing Categorical Variables
+
+While the t-test compares means between groups, the **chi-squared test** compares **proportions** or **distributions** of categorical variables across groups. Common questions include: "Does mortality rate differ between males and females?" or "Is there an association between treatment group and outcome?"
+
+### The Chi-Squared Test Framework
+
+The chi-squared test ($\chi^2$ test) evaluates whether the observed frequencies in a contingency table differ significantly from expected frequencies under independence:
+
+- **Null Hypothesis ($H_0$)**: The two variables are **independent** (no association)
+- **Alternative Hypothesis ($H_1$)**: The two variables are **associated** (not independent)
+- **Test Statistic**: $\chi^2 = \sum \frac{(\text{Observed} - \text{Expected})^2}{\text{Expected}}$
+- **P-value**: Probability of observing data this extreme if $H_0$ is true
+
+::: {.callout-success}
+**When to Use Chi-Squared**:
+- Comparing **proportions** between two or more categorical groups
+- Testing **association** between two categorical variables
+- Data organized in a **contingency table** (cross-tabulation)
+- Expected cell counts ≥ 5 in most cells
+:::
+
+## Setting Up the Environment
+
+::: {.callout-info}
+We'll analyze whether there is an association between sex (Male/Female) and patient outcome (Discharged/Death). This is a practical clinical question: do males and females have different mortality rates in this patient population?
+
+We'll create a 2×2 contingency table and use the chi-squared test to evaluate independence.
+:::
+
+```{r}
+#| label: setup
+
+# Load the synthetic dataset
+df <- read.csv(
+  "https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv"
+)
+
+df2 <- subset(
+  df,
+  demog_sex %in%
+    c("Male", "Female") &
+    outco_binary_outcome %in% c("Discharged", "Death") &
+    demog_sex != "" &
+    outco_binary_outcome != ""
+)
+
+paste("Dataset prepared:")
+paste("Total observations (after filtering):", nrow(df2))
+paste("Variables: Sex (Male/Female), Outcome (Discharged/Death)")
+```
+
+::: {.callout-info}
+**Data Filtering**: We keep only complete cases for sex (Male/Female) and outcome (Discharged/Death). This excludes censored or missing observations, ensuring clean data for our 2×2 contingency table.
+:::
+
+## Creating the Contingency Table
+
+A **contingency table** (also called a cross-tabulation) displays the joint frequency distribution of two categorical variables.
+
+### Basic Contingency Table
+
+```{r}
+#| label: create-contingency-table
+
+df2$outco_binary_outcome <- factor(
+  df2$outco_binary_outcome,
+  levels = c("Discharged", "Death")
+)
+
+tab_sex_mortality <- table(
+  Sex = df2$demog_sex,
+  Outcome = df2$outco_binary_outcome
+)
+
+paste("--- Contingency Table (Raw Counts) ---")
+tab_sex_mortality
+```
+
+::: {.callout-success}
+**Factor Conversion**: We convert the outcome to a factor with ordered levels (Discharged first, Death second). This ensures proper handling in statistical models and controls the reference category for regression analyses.
+:::
+
+### Contingency Table with Totals
+
+```{r}
+#| label: contingency-with-margins
+
+# Add row and column margins (totals)
+tab_with_margins <- addmargins(tab_sex_mortality)
+
+paste("--- Contingency Table with Row and Column Totals ---")
+tab_with_margins
+```
+
+::: {.callout-warning}
+**Reading the Table**:
+- Each cell contains the count of observations in that category combination
+- Row totals show how many males/females overall
+- Column totals show how many were discharged/died overall
+- The bottom-right cell is the grand total (N)
+:::
+
+## Calculating Proportions and Rates
+
+Understanding proportions helps visualize the relationship before formal testing:
+
+```{r}
+#| label: calculate-proportions
+
+# Calculate mortality rate within each sex
+male_total <- sum(tab_sex_mortality["Male", ])
+female_total <- sum(tab_sex_mortality["Female", ])
+male_deaths <- tab_sex_mortality["Male", "Death"]
+female_deaths <- tab_sex_mortality["Female", "Death"]
+
+male_mortality_rate <- male_deaths / male_total
+female_mortality_rate <- female_deaths / female_total
+
+paste("--- Mortality Rates by Sex ---")
+paste(sprintf(
+  "Males:   %d deaths out of %d (%.1f%%)",
+  male_deaths,
+  male_total,
+  male_mortality_rate * 100
+))
+paste(sprintf(
+  "Females: %d deaths out of %d (%.1f%%)",
+  female_deaths,
+  female_total,
+  female_mortality_rate * 100
+))
+paste(sprintf(
+  "Difference: %.1f percentage points",
+  (male_mortality_rate - female_mortality_rate) * 100
+))
+```
+
+## The Chi-Squared Test
+
+### Concept and Assumptions
+
+The chi-squared test compares **observed frequencies** (what we see in the data) to **expected frequencies** (what we'd expect if variables were independent).
+
+**Assumptions**:
+1. **Independence of observations**: Each observation belongs to only one cell
+2. **Minimum expected frequencies**: Generally, expected counts should be ≥ 5 in most cells
+3. **Adequate sample size**: Typically n ≥ 20 for 2×2 tables
+
+### Performing the Chi-Squared Test
+
+```{r}
+#| label: chi-squared-test
+
+chi <- chisq.test(tab_sex_mortality, correct = FALSE)
+
+chi
+```
+
+::: {.callout-info}
+**Yates Correction**: We use `correct = FALSE` for teaching clarity. The Yates continuity correction is conservative (makes it harder to reject H₀). In practice, many statisticians omit it for larger samples. See your field's conventions.
+:::
+
+### Examining Expected Frequencies
+
+Before interpreting results, verify that the chi-squared test assumptions are met:
+
+```{r}
+#| label: expected-frequencies
+
+paste("--- Expected Frequencies ---")
+chi$expected
+
+min_expected <- min(chi$expected)
+paste(sprintf("Minimum expected frequency: %.2f", min_expected))
+
+if (min_expected >= 5) {
+  paste("✓ All expected frequencies are ≥ 5 (assumption satisfied)")
+} else {
+  paste(
+    "⚠ Warning: Some expected frequencies < 5 (consider Fisher's exact test)"
+  )
+}
+```
+
+::: {.callout-warning}
+**Assumption Check**: The chi-squared test requires expected frequencies ≥ 5 in most cells. If this assumption is violated, use Fisher's exact test instead, which is exact and doesn't rely on this approximation.
+:::
+
+::: {.callout-info}
+**Expected Frequencies**: These represent how many observations we'd expect in each cell if sex and outcome were completely independent. Large differences between observed and expected frequencies suggest association.
+
+Formula: $E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand Total}}$
+:::
+
+## Interpreting the Results
+
+```{r}
+#| label: interpret-chi-squared
+
+chi_stat <- chi$statistic
+df_chi <- chi$parameter
+p_val <- chi$p.value
+
+paste("--- Chi-Squared Test Results ---")
+paste(sprintf("χ² statistic: %.4f", chi_stat))
+paste(sprintf("Degrees of freedom: %d", df_chi))
+paste(sprintf("p-value: %.4f", p_val))
+
+alpha <- 0.05
+if (p_val < alpha) {
+  decision <- "REJECT the null hypothesis"
+  interpretation <- "There IS statistically significant evidence of an association between sex and mortality outcome."
+} else {
+  decision <- "FAIL TO REJECT the null hypothesis"
+  interpretation <- "There is NOT sufficient evidence of an association between sex and mortality outcome."
+}
+
+paste(sprintf("Decision (α = 0.05): %s", decision))
+paste(sprintf("Interpretation: %s", interpretation))
+```
+
+::: {.callout-warning}
+**P-value Interpretation**: 
+- If p < 0.05: We reject $H_0$ and conclude there IS a statistically significant association
+- If p ≥ 0.05: We fail to reject $H_0$; we don't have enough evidence to conclude there's an association
+
+Remember: Failing to reject $H_0$ doesn't prove no association exists—it just means we don't have sufficient evidence from this data.
+:::
+
+## Effect Size: Odds Ratio
+
+The p-value tells us whether an association exists, but the **odds ratio (OR)** quantifies the strength of that association. We'll examine the odds of discharge vs. death, separately for each sex:
+
+```{r}
+#| label: odds-ratio
+#| echo: false
+
+# Calculate odds of discharge vs. death for each sex
+# Odds of discharge in males (Discharged / Death)
+odds_discharge_male <- tab_sex_mortality["Male", "Discharged"] /
+  tab_sex_mortality["Male", "Death"]
+
+# Odds of discharge in females (Discharged / Death)
+odds_discharge_female <- tab_sex_mortality["Female", "Discharged"] /
+  tab_sex_mortality["Female", "Death"]
+
+# Odds ratio: comparing odds of discharge between males and females
+odds_ratio <- odds_discharge_male / odds_discharge_female
+```
+
+| Group | Odds of Discharge (vs. Death) |
+|-------|------|
+| Males | `r sprintf("%.3f", odds_discharge_male)` |
+| Females | `r sprintf("%.3f", odds_discharge_female)` |
+| **Odds Ratio (Males/Females)** | **`r sprintf("%.3f", odds_ratio)`** |
+
+:::{.callout-info}
+**What This Means**: 
+
+- An **odds of discharge = 2.5** means for every 1 death, there are 2.5 discharges
+- The **odds ratio compares these ratios** between sexes
+- If OR = 1.2: Males have 20% higher odds of discharge (vs. death) compared to females
+- If OR < 1: Females have better odds of discharge (vs. death)
+:::
+
+
+
+::: {.callout-success}
+**Understanding Odds Ratio**:
+- OR = 1: No difference between groups
+- OR > 1: First group has higher odds of the outcome
+- OR < 1: First group has lower odds of the outcome
+- OR = 2 means "twice the odds" (100% higher odds)
+
+The OR is easier to interpret than raw frequencies and is commonly reported in clinical research.
+:::
+
+## Visualization: Stacked Bar Chart
+
+A visual representation of the contingency table makes patterns easier to see:
+
+```{r}
+#| label: fig-bar-chart
+#| fig-cap: "Outcomes by sex: stacked bar chart showing counts and proportions"
+
+colors <- c("Discharged" = "lightgreen", "Death" = "lightcoral")
+
+barplot(
+  tab_sex_mortality,
+  main = "Patient Outcomes by Sex",
+  xlab = "Sex",
+  ylab = "Number of Patients",
+  col = colors,
+  legend.text = TRUE,
+  args.legend = list(x = "topright", bty = "n"),
+  border = "darkgray",
+  lwd = 2
+)
+
+grid(nx = NA, ny = NULL, col = "lightgray", lty = 2)
+```
+
+## Alternative: Fisher's Exact Test
+
+If expected frequencies are too small (< 5), the chi-squared test may not be reliable. Use **Fisher's exact test** instead:
+
+| Situation | Test to Use |
+|-----------|------------|
+| Expected cell counts ≥ 5 | **Chi-squared test** |
+| Expected cell counts < 5 | **Fisher's exact test** |
+| Small sample (n < 20) | **Fisher's exact test** |
+
+**Code**: `fisher_result <- fisher.test(tab_sex_mortality)`
+
+Fisher's test is more conservative but provides exact p-values for small samples.
+
+## Key Takeaways
+
+::: {.callout-warning}
+
+1. **Chi-squared tests categorical associations**: Use for comparing proportions or testing independence between categorical variables.
+
+2. **Always examine the contingency table**: Look at raw counts and proportions before formal testing.
+
+3. **Check assumptions**: Verify that most expected cell counts are ≥ 5. Use Fisher's exact test for small expected counts.
+
+4. **Report both p-value and effect size**: The p-value tells you IF an association exists; the odds ratio tells you HOW STRONG it is.
+
+5. **Causation ≠ association**: A significant chi-squared test shows association, not causation. Sex doesn't "cause" mortality differences; other factors (physical differences, comorbidities, etc.) may explain both.
+
+6. **Clinical vs. statistical significance**: Statistical significance (p < 0.05) doesn't guarantee clinical importance. Consider whether the effect size (OR) is meaningful.
+
+:::
+
+Most of the examples in this section require a lot of manual coding and calculations. In R, specialized packages streamline these tasks significantly:
+
+::: {.callout-success}
+**Helpful Packages**:
+- **`epitools`** — Calculate odds ratios and confidence intervals directly from contingency tables
+- **`gtsummary`** — Create publication-ready summary tables and perform chi-squared tests with single-function calls
+:::
+
+```{r}
+#| label: install-packages
+#| output: false
+#| echo: false
+# Uncomment the following lines to install packages if not already installed
+# install.packages(c("epitools", "gtsummary"))
+```
+
+```{r}
+#| label: load-packages
+#| output: false
+library(epitools)
+library(gtsummary)
+```
+
+```{r}
+#| label: epitools-odds-ratio
+odds_ratio_result <- oddsratio(tab_sex_mortality)
+odds_ratio_result
+```
+
+```{r}
+#| label: gtsummary-chi-squared
+glm(outco_binary_outcome ~ demog_sex, data = df2, family = binomial) |>
+  tbl_regression(exponentiate = TRUE, label = list(demog_sex ~ "Sex"))
+```
+
+### When to Use Chi-Squared vs. Other Tests
+
+| Situation | Test |
+|-----------|------|
+| Two **categorical** variables | **Chi-squared** or Fisher's exact |
+| One **categorical** (2 groups), one **continuous** | **t-test** |
+| One **categorical** (3+ groups), one **continuous** | **ANOVA** |
+| Both variables **continuous** | **Correlation/Regression** |
+
