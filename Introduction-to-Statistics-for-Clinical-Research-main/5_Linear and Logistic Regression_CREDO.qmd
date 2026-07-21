@@ -1,0 +1,480 @@
+---
+title: "5_Linear and Logistic Regression"
+format: html
+author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
+self-contained: true
+standalone: true
+warnings: false
+font-size: '14px'
+---
+
+## Linear Regression
+
+### Load packages and dataset
+
+```{r}
+library(gtsummary)
+library(dplyr)
+
+# Read CSV from GitHub
+df <- read.csv(
+  "https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv"
+)
+
+# Convert age to numeric (it may come as character if some cells are "")
+age <- as.numeric(df$demog_age)
+
+# Convert date columns to Date objects
+df$outco_date <- as.Date(df$outco_date, format = "%Y-%m-%d")
+df$dates_admdate <- as.Date(df$dates_admdate, format = "%Y-%m-%d")
+
+# Compute length of stay (LOS) as difference between outcome date and admission date
+df$outco_lengthofstay <- as.numeric(df$outco_date - df$dates_admdate)
+
+# Ensure numeric age
+df$demog_age <- suppressWarnings(as.numeric(df$demog_age))
+
+# Keep only rows with valid numeric values for both age and LOS
+ok <- is.finite(df$demog_age) & is.finite(df$outco_lengthofstay)
+```
+
+:::: {.callout-important}
+**Before You Regress**: Regression models assume relationships between variables. Always visualize your data and check assumptions (linearity, homoscedasticity, normality of residuals) before interpreting coefficients. A "statistically significant" coefficient may be spurious if model assumptions are violated.
+::::
+
+
+
+### Output 1: Scatter plot
+
+:::: {.callout-note}
+**Visual Inspection First**: Always start with a scatter plot to visualize the relationship between predictor and outcome. Look for:
+- **Linearity**: Does the relationship appear linear, or would a transformation help?
+- **Outliers**: Are there extreme points that might unduly influence the regression line?
+- **Range**: Does the relationship hold across the full range of the predictor?
+::::
+
+```{r}
+# ----  ----
+# This plot shows the relationship between age (x-axis) and length of stay (y-axis).
+# Each point is a patient, and we can visually inspect whether older patients tend to stay longer.
+plot(
+  df$demog_age[ok],
+  df$outco_lengthofstay[ok],
+  xlab = "Age (years)",
+  ylab = "Length of Stay (days)",
+  main = "Length of Stay vs Age",
+  pch = 19,
+  cex = 0.7
+)
+```
+
+
+
+### Output 2: Fit linear regression model
+
+:::: {.callout-tip}
+**Interpreting Linear Regression Coefficients**: 
+- **Intercept (β₀)**: Predicted value of the outcome when all predictors = 0. In many clinical contexts, this is not clinically meaningful.
+- **Slope (β₁)**: Change in outcome for each 1-unit increase in the predictor. For example, if β₁ = 0.5 for age predicting LOS, each additional year of age is associated with 0.5 additional days of hospitalization.
+- **R²**: Proportion of variance in outcome explained by the predictor(s). Values closer to 1 indicate better fit, but low R² doesn't mean the relationship is unimportant—it may reflect real biological variability.
+::::
+
+:::: {.callout-warning}
+**Correlation ≠ Causation**: Regression describes associations, not causality. Even if age and LOS are strongly correlated, age doesn't "cause" longer stays—confounding variables (comorbidities, disease severity) may drive both relationships. Consider alternative explanations for observed associations.
+::::
+
+```{r}
+# Fit a simple linear regression: LOS ~ Age
+lm_fit <- lm(outco_lengthofstay ~ demog_age, data = df[ok, ])
+
+# Display summary
+summary(lm_fit)
+```
+
+
+### Output 3: Visualize regression line and identify outliers
+
+:::: {.callout-warning}
+**Outliers Can Distort Regression**: Extreme values (outliers) can disproportionately influence the regression line, particularly when the outlier is far from the center of the x-axis distribution. A single outlier can substantially change the slope and intercept. Always identify outliers before finalizing your model and decide whether to exclude them based on clinical plausibility, not statistical convenience.
+::::
+
+```{r}
+# Extract data for analysis
+los_data <- df$outco_lengthofstay[ok]
+age_data <- df$demog_age[ok]
+
+# Calculate IQR for LOS
+q1_los <- quantile(los_data, 0.25, na.rm = TRUE)
+q3_los <- quantile(los_data, 0.75, na.rm = TRUE)
+iqr_los <- q3_los - q1_los
+
+# Define outlier bounds (typically 1.5 * IQR beyond quartiles)
+lower_bound <- q1_los - 1.5 * iqr_los
+upper_bound <- q3_los + 1.5 * iqr_los
+
+# Identify outliers
+outlier_mask <- los_data < lower_bound | los_data > upper_bound
+
+cat("Original data:\n")
+cat("  Sample size:", length(los_data), "\n")
+cat("  Number of outliers detected:", sum(outlier_mask), "\n")
+cat("  Outlier LOS values:", los_data[outlier_mask], "\n\n")
+
+# Create a plot highlighting outliers with the regression line
+plot(
+  age_data,
+  los_data,
+  xlab = "Age (years)",
+  ylab = "Length of Stay (days)",
+  main = "Length of Stay vs Age: WITH OUTLIERS",
+  pch = 19,
+  cex = 0.7,
+  col = ifelse(outlier_mask, "red", "black")
+)
+
+# Add the original regression line
+abline(lm_fit, col = "blue", lwd = 2.5)
+
+# Highlight outliers with larger circles
+points(
+  age_data[outlier_mask],
+  los_data[outlier_mask],
+  col = "red",
+  pch = 21,
+  cex = 1.2,
+  lwd = 2
+)
+
+legend(
+  "topright",
+  legend = c("Normal points", "Outliers", "Regression line"),
+  col = c("black", "red", "blue"),
+  pch = c(19, 21, NA),
+  lty = c(NA, NA, 1),
+  lwd = c(1, 2, 2.5)
+)
+```
+
+
+### Output 4: Refit model after removing outliers
+
+```{r}
+# Remove outliers and refit the model
+data_without_outliers <- df[ok, ][!outlier_mask, ]
+
+lm_fit_clean <- lm(outco_lengthofstay ~ demog_age, data = data_without_outliers)
+
+cat("\n\n--- MODEL COMPARISON ---\n")
+cat("Original model (with outliers):\n")
+print(summary(lm_fit))
+
+cat("\n\nModel without outliers:\n")
+print(summary(lm_fit_clean))
+
+# Compare coefficients
+cat("\n\n--- COEFFICIENT COMPARISON ---\n")
+cat(
+  "Intercept (with outliers):",
+  round(coef(lm_fit)[1], 3),
+  "\n",
+  "Intercept (without outliers):",
+  round(coef(lm_fit_clean)[1], 3),
+  "\n\n"
+)
+cat(
+  "Slope (with outliers):",
+  round(coef(lm_fit)[2], 5),
+  "\n",
+  "Slope (without outliers):",
+  round(coef(lm_fit_clean)[2], 5),
+  "\n\n"
+)
+cat(
+  "R² (with outliers):",
+  round(summary(lm_fit)$r.squared, 4),
+  "\n",
+  "R² (without outliers):",
+  round(summary(lm_fit_clean)$r.squared, 4),
+  "\n"
+)
+```
+
+### Output 4.5: Statistical comparison of models
+
+:::: {.callout-tip}
+**Model Comparison Strategy**: Since the two models are fitted to different subsets of data (one includes outliers, one excludes them), we cannot use the standard ANOVA F-test, which requires the same sample size. Instead, we compare key fit statistics: residual sum of squares (RSS), residual standard error (σ), R², and F-statistics. These metrics directly quantify model improvement.
+::::
+
+```{r}
+# Compare models fitted to different datasets
+# Cannot use anova() directly due to different sample sizes
+# Instead, create a comprehensive comparison of fit statistics
+
+cat("\n\n--- DETAILED MODEL COMPARISON TABLE ---\n\n")
+
+# Extract key statistics from both models
+stats_comparison <- data.frame(
+  Statistic = c(
+    "Sample Size",
+    "Residual Degrees of Freedom",
+    "Residual Sum of Squares (RSS)",
+    "Residual Std. Error (σ)",
+    "R-squared",
+    "Adjusted R-squared",
+    "F-statistic",
+    "F-statistic p-value"
+  ),
+  "With Outliers" = c(
+    nobs(lm_fit),
+    df.residual(lm_fit),
+    round(sum(residuals(lm_fit)^2), 2),
+    round(summary(lm_fit)$sigma, 4),
+    round(summary(lm_fit)$r.squared, 4),
+    round(summary(lm_fit)$adj.r.squared, 4),
+    round(summary(lm_fit)$fstatistic[1], 4),
+    format.pval(
+      pf(
+        summary(lm_fit)$fstatistic[1],
+        summary(lm_fit)$fstatistic[2],
+        summary(lm_fit)$fstatistic[3],
+        lower.tail = FALSE
+      ),
+      digits = 2
+    )
+  ),
+  "Without Outliers" = c(
+    nobs(lm_fit_clean),
+    df.residual(lm_fit_clean),
+    round(sum(residuals(lm_fit_clean)^2), 2),
+    round(summary(lm_fit_clean)$sigma, 4),
+    round(summary(lm_fit_clean)$r.squared, 4),
+    round(summary(lm_fit_clean)$adj.r.squared, 4),
+    round(summary(lm_fit_clean)$fstatistic[1], 4),
+    format.pval(
+      pf(
+        summary(lm_fit_clean)$fstatistic[1],
+        summary(lm_fit_clean)$fstatistic[2],
+        summary(lm_fit_clean)$fstatistic[3],
+        lower.tail = FALSE
+      ),
+      digits = 2
+    )
+  ),
+  stringsAsFactors = FALSE
+)
+
+print(stats_comparison, row.names = FALSE)
+
+cat("\n\n--- QUANTITATIVE IMPROVEMENTS FROM OUTLIER REMOVAL ---\n\n")
+rss_reduction <- sum(residuals(lm_fit)^2) - sum(residuals(lm_fit_clean)^2)
+pct_rss_reduction <- 100 * rss_reduction / sum(residuals(lm_fit)^2)
+sigma_reduction <- summary(lm_fit)$sigma - summary(lm_fit_clean)$sigma
+r2_improvement <- summary(lm_fit_clean)$r.squared - summary(lm_fit)$r.squared
+
+cat(
+  "Residual Sum of Squares (RSS) reduction:",
+  round(rss_reduction, 2),
+  "units (",
+  round(pct_rss_reduction, 1),
+  "% improvement)\n"
+)
+cat(
+  "Residual Std. Error reduction:",
+  round(sigma_reduction, 4),
+  "days (prediction error improved by",
+  round(sigma_reduction, 4),
+  ")\n"
+)
+cat(
+  "R² improvement:",
+  round(r2_improvement, 4),
+  "units (model explains",
+  round(r2_improvement * 100, 2),
+  "% more variance)\n"
+)
+cat("\nNumber of outliers removed:", sum(outlier_mask), "\n")
+cat(
+  "Percentage of data removed:",
+  round(100 * sum(outlier_mask) / length(outlier_mask), 1),
+  "%\n"
+)
+```
+
+:::: {.callout-important}
+**Interpreting Model Comparison**: 
+- **Lower RSS**: The cleaned model has substantially lower residual sum of squares, indicating the data points fit the regression line more closely
+- **Lower Residual Std. Error (σ)**: Represents the typical prediction error; a smaller σ means predictions are more accurate in the cleaned model
+- **Higher R² and Adjusted R²**: More of the variance in length of stay is explained by age after removing outliers
+- **Strong F-statistics**: Both models show significant relationships, but the cleaned model has a stronger one
+- **Practical Impact**: Removing just a few outliers (e.g., ~1% of data) can substantially improve model fit—this is why outlier inspection matters for prediction accuracy
+::::
+
+
+### Output 5: Visualize both models for comparison
+
+```{r}
+# Side-by-side comparison
+par(mfrow = c(1, 2))
+
+# Plot 1: Original data with outliers
+plot(
+  age_data,
+  los_data,
+  xlab = "Age (years)",
+  ylab = "Length of Stay (days)",
+  main = "WITH OUTLIERS",
+  pch = 19,
+  cex = 0.7,
+  col = ifelse(outlier_mask, "red", "black"),
+  ylim = c(-10, 150)
+)
+abline(lm_fit, col = "blue", lwd = 2.5)
+mtext(
+  paste(
+    "Slope:",
+    round(coef(lm_fit)[2], 4),
+    "\nR²:",
+    round(summary(lm_fit)$r.squared, 4)
+  ),
+  side = 3,
+  line = -3,
+  adj = 0.05,
+  cex = 0.9,
+  col = "blue",
+  font = 2
+)
+
+# Plot 2: Data without outliers
+plot(
+  data_without_outliers$demog_age,
+  data_without_outliers$outco_lengthofstay,
+  xlab = "Age (years)",
+  ylab = "Length of Stay (days)",
+  main = "OUTLIERS REMOVED",
+  pch = 19,
+  cex = 0.7,
+  col = "darkgreen",
+  ylim = c(-10, 150)
+)
+abline(lm_fit_clean, col = "darkred", lwd = 2.5)
+mtext(
+  paste(
+    "Slope:",
+    round(coef(lm_fit_clean)[2], 4),
+    "\nR²:",
+    round(summary(lm_fit_clean)$r.squared, 4)
+  ),
+  side = 3,
+  line = -3,
+  adj = 0.05,
+  cex = 0.9,
+  col = "darkred",
+  font = 2
+)
+
+par(mfrow = c(1, 1))
+```
+
+:::: {.callout-important}
+**Outlier Removal Decision**: Removing outliers improved the model fit (higher R²) and revealed the true relationship more clearly. However, outlier removal should be guided by clinical judgment:
+- **Plausible outliers**: Data entry errors or measurement artifacts should be removed.
+- **Implausible outliers**: Real but extreme cases may represent important clinical subgroups and should be retained unless there is strong evidence of error.
+- **Always report**: State how many outliers were removed, why, and provide comparisons of models with and without them. Transparency builds trust in your analysis.
+::::
+
+### Output 6: Publication-ready regression table with gtsummary
+
+We can also use the `gtsummary` package to create a nice regression table. Since this is a linear regression, we will not exponentiate the coefficients (unlike logistic regression which we will be looking at next).
+
+```{r}
+tbl_regression(
+  lm_fit,
+  exponentiate = FALSE,
+  intercept = TRUE,
+  label = list(demog_age ~ "Age (years)") # We use "label" argument here again like we did in the descriptive table section to provide a more user-friendly label for the age variable in the regression table.
+)
+```
+
+
+
+### Logistic Regression
+
+:::: {.callout-important}
+**When to Use Logistic Regression**: Use logistic regression when your outcome is binary (e.g., Death/Discharged, Disease/Healthy, Yes/No). The model estimates the probability of the outcome occurring and produces odds ratios that quantify risk. Linear regression on binary outcomes will produce nonsensical predictions outside [0, 1].
+::::
+
+:::: {.callout-note}
+**Missing Data Handling**: The `na.omit()` function removes all rows with any missing values in the selected variables. This is a "complete case analysis" approach. Always report: (1) original sample size, (2) number of rows removed, and (3) comparison of included vs. excluded patients. Systematic differences in missingness can introduce bias.
+::::
+
+```{r}
+# Keep only patients with Death/Discharged outcomes and recode:
+# Death = 1, Discharged = 0
+df <- subset(df, outco_binary_outcome %in% c("Death", "Discharged"))
+df$outco_binary_outcome <- ifelse(df$outco_binary_outcome == "Death", 1L, 0L)
+
+# Recode sex: 1 = Male, 0 = Female, and drop other categories
+df <- df %>%
+  filter(demog_sex %in% c("Male", "Female")) %>%
+  mutate(sex_binary = ifelse(demog_sex == "Male", 1L, 0L))
+
+# Ensure predictors are numeric
+df$demog_age <- as.numeric(df$demog_age)
+df$labs_platelets_103ul <- as.numeric(df$labs_platelets_103ul)
+
+# Remove rows with missing values in outcome or predictors using the `na.omit()` function. This ensures that the logistic regression model is fitted only on complete cases.
+df_clean <- df %>%
+  select(outco_binary_outcome, sex_binary, demog_age, labs_platelets_103ul) %>%
+  na.omit()
+
+# Fit logistic regression with mortality as outcome
+# Predictors: sex (male/female), age, platelet count
+logit_model <- glm(
+  outco_binary_outcome ~ sex_binary + demog_age + labs_platelets_103ul,
+  data = df_clean,
+  family = binomial(link = "logit")
+)
+
+# Display model summary (coefficients on log-odds scale)
+summary(logit_model)
+
+# Calculate odds ratios with 95% confidence intervals
+exp(cbind(OR = coef(logit_model), confint(logit_model)))
+```
+
+
+
+### Bonus: Publication-Ready Summary Table for Logistic Regression
+
+:::: {.callout-tip}
+**Interpreting Odds Ratios**:
+- **OR = 1.0**: No association (predictor has no effect on odds of outcome)
+- **OR > 1.0**: Increased odds of outcome (risk factor). E.g., OR = 1.76 = 76% higher odds.
+- **OR < 1.0**: Decreased odds of outcome (protective factor). E.g., OR = 0.80 = 20% lower odds.
+- **Confidence Intervals**: If the 95% CI includes 1.0, the association is not statistically significant at α = 0.05. Wider CIs reflect greater uncertainty.
+::::
+
+```{r}
+
+tbl_regression(
+  logit_model,
+
+  exponentiate = TRUE, # Exponentiate coefficients to get odds ratios
+
+  label = list(
+    sex_binary ~ "Sex (Male vs Female)",
+    demog_age ~ "Age (years)",
+    labs_platelets_103ul ~ "Platelet Count (10^3/µL)"
+  )
+)
+```
+
+## Bonus: Alternative Interpretation with the `report` Package
+
+:::{.callout-note}
+```{r}
+report::report(logit_model)
+```
+
+
+:::

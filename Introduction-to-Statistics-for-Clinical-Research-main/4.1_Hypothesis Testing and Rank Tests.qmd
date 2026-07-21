@@ -1,0 +1,291 @@
+---
+title: "Hypothesis Testing: Comparing Means"
+author: "Global Health and Infectious Diseases Group - KCCR-KNUST, Ghana for ISARIC"
+format: html
+self-contained: true
+standalone: true
+warnings: false
+font-size: '14px'
+---
+
+## Hypothesis Testing: Comparing Means
+
+In clinical research, we frequently ask questions like: "Do males and females have different platelet counts?" or "Does treatment A work better than treatment B?" Hypothesis testing provides a statistical framework to answer these questions with quantified uncertainty.
+
+### The Hypothesis Testing Framework
+
+A **hypothesis test** evaluates evidence against a null hypothesis ($H_0$) using sample data:
+
+- **Null Hypothesis ($H_0$)**: There is **no difference** between groups (e.g., mean platelets in males = mean platelets in females)
+- **Alternative Hypothesis ($H_1$)**: There **is a difference** between groups
+- **Test Statistic**: A calculated value that measures how different the groups are
+- **P-value**: The probability of observing data this extreme (or more) if $H_0$ is true
+- **Significance Level ($\alpha$)**: Typically 0.05, the threshold for deciding when to reject $H_0$
+
+::: {.callout-warning}
+**Important**: A p-value is **NOT** the probability that the null hypothesis is true. It's the probability of observing data this extreme if the null hypothesis were true. This is a crucial distinction often misunderstood in research.
+:::
+
+## Setting Up the Environment
+
+::: {.callout-note}
+We'll analyze whether platelet counts differ between males and females using a two-sample t-test. The t-test is appropriate when comparing the means of two continuous variables across two independent groups.
+:::
+
+```{r}
+#| label: setup
+
+# Load the synthetic dataset
+df <- read.csv(
+  "https://raw.githubusercontent.com/EstebanGarciaG/Lectures/main/data/data_synth.csv"
+)
+
+# Convert platelets to numeric and suppress conversion warnings
+df$labs_platelets_103ul <- suppressWarnings(as.numeric(df$labs_platelets_103ul))
+
+df <- df[!is.na(df$labs_platelets_103ul) & df$demog_sex != "", ]
+
+paste("Dataset prepared:")
+paste("Total observations:", nrow(df))
+paste("Variables: Platelets (10³/µL), Sex")
+```
+
+::: {.callout-note}
+**Data Preparation**: We convert platelets to numeric (suppressing warnings) and remove rows with missing values in either platelet count or sex. This ensures clean, complete data for the t-test.
+:::
+
+## Exploratory Analysis: Boxplot by Sex
+
+Before conducting a formal hypothesis test, it's important to visualize the data. A boxplot shows the distribution of platelet counts separately for males and females, making any differences immediately apparent.
+
+### Creating the Boxplot
+
+```{r}
+#| label: fig-boxplot
+#| fig-cap: "Distribution of platelet counts by sex"
+
+boxplot(
+  labs_platelets_103ul ~ demog_sex,
+  data = df,
+  main = "Platelet Counts by Sex",
+  xlab = "Sex",
+  ylab = "Platelets (10³/µL)",
+  col = c("lightblue", "lightpink"),
+  border = "darkgray",
+  lwd = 2
+)
+
+grid(nx = NA, ny = NULL, col = "lightgray", lty = 2)
+```
+
+::: {.callout-tip}
+**What to Look For**: 
+- Are the medians (center line) in each box substantially different?
+- Is there overlap in the interquartile ranges (the boxes)?
+- Are there outliers (points beyond the whiskers)?
+
+Visual inspection helps determine if a statistical test is likely to find a significant difference.
+:::
+
+## Separating Groups for Analysis
+
+```{r}
+#| label: separate-groups
+
+group_male <- df$labs_platelets_103ul[df$demog_sex == "Male"]
+group_female <- df$labs_platelets_103ul[df$demog_sex == "Female"]
+
+paste("--- Descriptive Statistics ---")
+paste(sprintf("Males (n = %d):", length(group_male)))
+paste(sprintf(
+  "  Mean = %.2f, SD = %.2f, Median = %.2f",
+  mean(group_male),
+  sd(group_male),
+  median(group_male)
+))
+
+paste(sprintf("Females (n = %d):", length(group_female)))
+paste(sprintf(
+  "  Mean = %.2f, SD = %.2f, Median = %.2f",
+  mean(group_female),
+  sd(group_female),
+  median(group_female)
+))
+
+paste(sprintf(
+  "Difference in means: %.2f (10³/µL)",
+  mean(group_male) - mean(group_female)
+))
+```
+
+## The Two-Sample t-Test
+
+### Concept
+
+The **two-sample t-test** (also called independent samples t-test) compares the means of two independent groups. The test statistic is:
+
+$$t = \frac{\overline{x}_1 - \overline{x}_2}{SE_{difference}}$$
+
+where $SE_{difference} = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}$
+
+The t-test assumes:
+1. **Independence**: Observations within each group are independent
+2. **Normality**: Data in each group is approximately normally distributed (t-test is robust to mild violations)
+3. **Equal variances**: Variances are similar between groups (Welch's t-test relaxes this assumption)
+
+::: {.callout-note}
+By default, R performs Welch's t-test, which does not assume equal variances. This is generally recommended for real-world data.
+:::
+
+### Performing the t-Test
+
+```{r}
+#| label: t-test
+
+t_test_result <- t.test(group_male, group_female)
+
+t_test_result
+```
+
+::: {.callout-note}
+**Welch's t-test**: R automatically performs Welch's t-test by default, which does not assume equal variances between groups. This is more robust and generally recommended for real-world data. Use `var.equal = TRUE` only if you have strong evidence of equal variances.
+:::
+
+## Interpreting the Results
+
+::: {.callout-warning}
+## Key Output Explained
+
+The t-test output includes:
+
+| Component | Interpretation |
+|-----------|-----------------|
+| **t statistic** | How many standard errors the difference in means is. Larger absolute values suggest greater differences. |
+| **Degrees of freedom (df)** | Related to sample size; affects the critical value for the t-statistic. |
+| **p-value** | Probability of observing a difference this large if the null hypothesis were true. |
+| **95% CI** | Range of plausible values for the true difference in population means. |
+:::
+
+```{r}
+#| label: interpret-results
+
+# Extract and display key results
+t_stat <- t_test_result$statistic
+p_val <- t_test_result$p.value
+ci_lower <- t_test_result$conf.int[1]
+ci_upper <- t_test_result$conf.int[2]
+
+paste("--- Hypothesis Test Results Summary ---")
+paste(sprintf("t-statistic: %.4f", t_stat))
+paste(sprintf("p-value: %.4f", p_val))
+paste(sprintf("95%% Confidence Interval: [%.2f, %.2f]", ci_lower, ci_upper))
+
+# Decision
+alpha <- 0.05
+if (p_val < alpha) {
+  decision <- "REJECT the null hypothesis"
+  interpretation <- "There IS statistically significant evidence that platelet counts differ between males and females."
+} else {
+  decision <- "FAIL TO REJECT the null hypothesis"
+  interpretation <- "There is NOT sufficient evidence that platelet counts differ between males and females."
+}
+
+paste(sprintf("Decision (α = 0.05): %s", decision))
+paste(sprintf("Interpretation: %s", interpretation))
+```
+
+## Effect Size
+
+Beyond p-values, it's important to report **effect size**—a measure of the magnitude of the difference:
+
+```{r}
+#| label: effect-size
+
+# Calculate Cohen's d (standardized effect size)
+pooled_sd <- sqrt(
+  ((length(group_male) - 1) *
+    sd(group_male)^2 +
+    (length(group_female) - 1) * sd(group_female)^2) /
+    (length(group_male) + length(group_female) - 2)
+)
+
+cohens_d <- (mean(group_male) - mean(group_female)) / pooled_sd
+
+paste("--- Effect Size ---")
+paste(sprintf("Cohen's d: %.3f", cohens_d))
+
+# Interpret Cohen's d
+if (abs(cohens_d) < 0.2) {
+  interpretation <- "Negligible effect"
+} else if (abs(cohens_d) < 0.5) {
+  interpretation <- "Small effect"
+} else if (abs(cohens_d) < 0.8) {
+  interpretation <- "Medium effect"
+} else {
+  interpretation <- "Large effect"
+}
+
+paste(sprintf("Interpretation: %s", interpretation))
+```
+
+::: {.callout-tip}
+**Why Report Effect Size?**: Even with large samples, a statistically significant p-value might reflect a tiny, clinically unimportant difference. Effect size tells us whether the difference is practically meaningful.
+:::
+
+## Key Takeaways
+
+::: {.callout-warning}
+
+1. **Always visualize first**: Use boxplots or other graphics to understand the data before testing.
+
+2. **p-value ≠ probability null is true**: A p-value of 0.05 does NOT mean there's a 5% chance the null hypothesis is true.
+
+3. **Report both p-values and effect sizes**: Statistical significance and practical significance are different.
+
+4. **Check assumptions**: Verify that data approximate normality and groups are independent.
+
+5. **Confidence interval is informative**: The CI shows the range of plausible differences and is often more useful than just a p-value.
+
+6. **Multiple testing increases error**: If you conduct many tests, some will appear significant by chance. Consider multiple testing corrections if appropriate.
+
+:::
+
+## Simple tables with `gtsummary` package
+
+In addition to visualizations, tables are a great way to summarize your data. The `gtsummary` package in R allows you to create publication-ready summary tables. The syntax is straightforward and flexible, making it easy to customize tables for your specific needs.
+```{r}
+#| label: gtsummary-table
+library(gtsummary)
+
+df |>
+  select(demog_sex, labs_platelets_103ul) |>
+  tbl_summary(
+    by = demog_sex,
+    missing = "no",
+    statistic = list(all_continuous() ~ "{mean} ({sd})")
+  ) |>
+  add_difference() |>
+  add_overall()
+```
+### When to Use the t-Test
+
+- Comparing means between **two independent groups**
+- Continuous outcome variable (e.g., platelet count)
+- Approximately normal distributions
+- **Not** for paired data (use paired t-test instead)
+- **Not** for more than two groups (use ANOVA instead)
+
+## R package to help with interpretation
+As a beginner, you may find it helpful to use the `report` package in R, which provides plain-language interpretations of statistical results. This can help you understand the output of your tests and communicate findings effectively.
+
+
+```{r}
+if (!requireNamespace("report", quietly = TRUE)) {
+  install.packages("report")
+}
+report::report(t_test_result)
+```
+
+:::{.callout-warning}
+**Tip**: Sometimes, you only need a single function from a package. In that case, you can use the `::` operator to call the function without loading the entire package. For example, `report::report()` calls the `report()` function from the `report` package, without attaching the entire package. In other cases, some packages may have conflicting function names, so using `::` ensures you are calling the correct function from the intended package. E.g. the `dplyr` and `MASS` packages both have a `select()` function, so you can use `dplyr::select()` to specify which one you want to use. A common convention is to load the library that you will use most often, and use `::` for functions from other packages or load the most frequently used package last to avoid conflicts. In most cases therefore `library(MASS)` is loaded first before `library(dplyr)` so that `select()` will refer to the `dplyr` version of the function. Then if you need to use the `select()` function from the `MASS` package, you can call it as `MASS::select()`.
+:::

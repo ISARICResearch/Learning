@@ -1,0 +1,15 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.posit/assistant/settings.json
+
+# Quarto/R Markdown generated files
+*.html
+*_files/
+*_cache/
+.quarto/
+
+# Temporary files
+.DS_Store
+Thumbs.db
