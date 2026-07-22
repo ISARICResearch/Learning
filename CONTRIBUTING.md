@@ -1,9 +1,9 @@
 Contributing
 ============
 
-Contributions to this repository are defined as any set of changes made to one or more files in the repository, specifically, in the default (``main``) branch of the repository.
+Contributions to this repository are defined as any set of version-controlled changes made to one or more files in the repository, specifically, in the default (``main``) branch of the repository. [Git](https://git-scm.com/) is used for version control, and the [GitHub repository](https://github.com/ISARICResearch/Learning) is the principal public version.
 
-Such changes are, typically, proposed in the form of a [pull request](https://docs.github.com/en/pull-requests/reference/pull-requests) (PR) that must first be reviewed and approved by a repository member with the appropriate level of permission, following which the pull request is merged into the repository and the changes incorporated.
+Changes are, typically, proposed in the form of a [pull request](https://docs.github.com/en/pull-requests/reference/pull-requests) (PR) that must first be reviewed and approved by a repository member with the appropriate level of permission, following which the pull request is merged into the repository and the changes incorporated.
 
 Before submitting pull requests contributors must first:
 
@@ -11,7 +11,7 @@ Before submitting pull requests contributors must first:
 
 * If working with a clone, check they have the right level of access to the repository, which is usually the ability to read from and write to the repository. Access is typically granted by repository maintainers, who are [listed](https://github.com/ISARICResearch/Learning/blob/contributing/README.md#maintainers) in the README.
 
-The basic PR-based contributions workflow is described below. Some familiarity with the [Git](https://git-scm.com/) version control system and the [GitHub](https://github.com) platform is also assumed and useful. As this is independent of the contributions workflow the relevant and appropriate documentation or external learning resources can be consulted.
+The basic PR-based contributions workflow is described below. Some familiarity with Git and GitHub are assumed and  also useful. As this is independent of the contributions workflow the relevant and appropriate documentation or external learning resources can be consulted.
  
 
 Basic PR Workflow
