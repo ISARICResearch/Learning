@@ -4,6 +4,27 @@ Open educational resources for clinical research, biostatistics, epidemiology, d
 
 ## Quick Start
 
+### 0. Getting a Copy of the Repository
+
+As described in the [contributions guide](https://github.com/ISARICResearch/Learning/blob/main/CONTRIBUTING.md) contributors need to have a copy of the repository either as a clone or a fork.
+
+The repository can be [cloned](https://git-scm.com/docs/git-clone) with Git, for example, over HTTPS:
+```shell
+git clone git+https://github.com/ISARICResearch/Learning
+```
+or over SSH:
+```shell
+git clone git+ssh://git@github.com/ISARICResearch/Learning
+```
+
+> [!Note]
+If using SSH consult the [GitHub SSH guide](https://docs.github.com/authentication/connecting-to-github-with-ssh) for more information on creating and setting up SSH keys to connect to your GitHub account.
+
+Alternatively, if you're developing in a Git-integrated IDE such as VS Code then cloning can be performed within the IDE.
+
+The repository can also be [forked](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/fork-a-repo), if a fork is preferred, using the Fork option on the GitHub repository home page.
+
+
 ### 1. Install Dependencies
 
 Before running any Quarto documents, install required packages:
@@ -319,7 +340,10 @@ See LICENSE file for terms and conditions.
 
 ## Contributing
 
-To enhance these materials:
+A general set of contributions guidelines and basic workflow is described [here](https://github.com/ISARICResearch/Learning/blob/main/CONTRIBUTING.md).
+
+Additional aspects include those listed below.
+
 1. Test all code examples thoroughly
 2. Add clinical context where helpful
 3. Document any structural changes
