@@ -17,13 +17,13 @@ The basic PR-based contributions workflow is described below. Some familiarity w
 Basic PR Workflow
 -----------------
 
-1. Create a new (local) repository branch that will contain your changes - usually this will be created from the latest copy of ``main``, but it could also be different depending on your requirements.
+1. Create a new (local) repository branch that will contain your changes - usually this will be created from the latest copy of the ``main`` branch, which is the default branch, but this could be different depending on your requirements.
 
 2. Make all required / desired changes on this new local branch.
 
 3. Once you're satisfied with the changes, push the branch upstream to the GitHub repository, that is, https://github.com/ISARICResearch/Learning. Note that the upstream branch can be updated at any point after making local changes, and does not need to be postponed until the changes are all complete locally - the exact approach used is entirely up to the contributor.
 
-4. [Create a GitHub PR](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request) from the upstream branch.
+4. [Create a GitHub PR](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request) from the upstream branch targeting the ``main`` branch.
 
 5. After making any final checks, request a PR review from a repository member - one reviewer is sufficient, and all PRs require a minimum of one approval.
 
