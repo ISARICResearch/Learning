@@ -29,7 +29,7 @@ Basic PR Workflow
 
 6. If the PR is approved, merge it yourself, or, alternatively, request a merge from the reviewer or another repository member. 
 
-7. If there are questions or changes requested from the reviewer these must be addressed - this may required changes that must be staged and commited on the local branch in the usual way, before updating the upstream branch (which updates the PR). Request another review and approval if required, and merge the PR as described in (6).
+7. If there are questions or changes requested from the reviewer these must be addressed - this may require changes that must be staged and commited on the local branch in the usual way, before updating the upstream branch (which updates the PR). Request another review and approval if required, and merge the PR as described in (6).
 
 Issues
 ------
