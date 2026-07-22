@@ -7,8 +7,9 @@ Such changes are, typically, proposed in the form of a [pull request](https://do
 
 Before submitting pull requests contributors must first:
 
-* Have a copy of the repository as a clone or fork - there are concise README instructions on how to do this if in doubt.
-* If working with a clone, check they have the right level of access to the repository, which is usually the ability to read from and write to the repository. Access is typically granted by a repository administrator or owner, who are listed in the README.
+* Have a copy of the repository as a clone or fork - there are concise [README instructions](https://github.com/ISARICResearch/Learning/blob/contributing/README.md#0-getting-a-copy-of-the-repository) on how to do this if in doubt.
+
+* If working with a clone, check they have the right level of access to the repository, which is usually the ability to read from and write to the repository. Access is typically granted by repository maintainers, who are [listed](https://github.com/ISARICResearch/Learning/blob/contributing/README.md#maintainers) in the README.
 
 The basic PR-based contributions workflow is described below. Some familiarity with the [Git](https://git-scm.com/) version control system and the [GitHub](https://github.com) platform is also assumed and useful. As this is independent of the contributions workflow the relevant and appropriate documentation or external learning resources can be consulted.
  
@@ -33,5 +34,5 @@ Basic PR Workflow
 Issues
 ------
 
-[Creating issues](https://github.com/ISARICResearch/Learning/issues) also count as informal contributions - these are not counted in the repository's Git log. Issues can be used to define and discuss features, bugs and other relevant improvements or changes. They can also be linked to PRs. For more informtion see the [GitHub documentation](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart).
+[Creating issues](https://github.com/ISARICResearch/Learning/issues) also count as informal contributions - these are not counted in the repository's Git log. Issues can be used to define and discuss features, bugs and other relevant improvements or changes. They can also be linked to PRs. For more information see the [GitHub documentation](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart).
 

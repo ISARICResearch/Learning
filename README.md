@@ -338,6 +338,14 @@ See LICENSE file for terms and conditions.
 
 ---
 
+## Maintainers
+
+Repository members who manage access and maintenance issues are listed below:
+
+- Esteban Garcia-Gallo - esteban.garcia@ndm.ox.ac.uk
+- Sara Duque Vallejo - sara.duquevallejo@ndm.ox.ac.uk
+- Sandeep Murthy - sandeep.murthy@ndm.ox.ac.uk
+
 ## Contributing
 
 A general set of contributions guidelines and basic workflow is described [here](https://github.com/ISARICResearch/Learning/blob/main/CONTRIBUTING.md).
