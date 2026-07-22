@@ -346,6 +346,12 @@ Repository members who manage access, maintenance and change management issues a
 - Sara Duque Vallejo - sara.duquevallejo@ndm.ox.ac.uk
 - Sandeep Murthy - sandeep.murthy@ndm.ox.ac.uk
 
+## Contributors
+
+- Esteban Garcia-Gallo - esteban.garcia@ndm.ox.ac.uk
+- Ibrahim Kwaku Duah - kwakuduah@kccr.de
+- Robert Asampong - r.asampong@kccr.de
+
 ---
 
 ## Contributing
