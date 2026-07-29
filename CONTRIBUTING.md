@@ -46,10 +46,6 @@ Status check errors can be investigated by inspecting the [GitHub Actions workfl
 Merge conflicts can be [resolved locally on the command line](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/resolving-a-merge-conflict-using-the-command-line) **only if you're familiar with Git**, otherwise please ask a [maintainer](https://github.com/ISARICResearch/Learning/blob/main/README.md#maintainers). Merge conflicts can also be [resolved on
 GitHub](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requestsresolving-a-merge-conflict-on-github). Resolving a merge conflict will always create a new merge commit in the PR branch.
 
-An example screenshot from a PR with all checks passing is given below.
-
-![PR Checks](github-pr-checks.png)
-
 Another point to note is that if the PR's target (or base) branch, usually `main`, is updated (by other PRs or direct commits) while the PR is still in development or review (and is therefore unmerged), you should see a warning on the PR status checks box that it is [out of date and should be updated](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/keeping-your-pull-request-in-sync-with-the-base-branch). This may sometimes lead to merge conflicts, which must be resolved as described above, before proceeding with further PR changes.
 
 ### PR Rules
@@ -68,7 +64,3 @@ These rules can only be bypassed by an [ISARICResearch GitHub organisation](http
 As mentioned in the introduction to this page, [creating issues](https://github.com/ISARICResearch/Learning/issues) also counts as contributions - however these are informal and not part of version control.
 
 Issues can be used to define and discuss features, bugs and other relevant improvements or changes. They can also be linked to PRs. For more information see the [GitHub documentation](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/quickstart).
-
-Issues have settings such as assignees, colour-coded tags/labels, type, project etc. and can be linked to PRs. These appear on the right hand side of the issue page, and it is recommended to apply the relevant settings, where this is practical. A screenshot is shown below of an issue creation page to provide context.
-
-![Issues](github-issues.png)
