@@ -3,6 +3,7 @@
 
 # List of required packages
 required_packages <- c(
+  "stringi",
   "tidyverse",
   "gtsummary",
   "report",
@@ -32,7 +33,7 @@ if (length(missing_packages) > 0) {
 cat("\nVerifying installations:\n")
 for (pkg in required_packages) {
   if (requireNamespace(pkg, quietly = TRUE)) {
-    cat("✓", pkg, "-", packageVersion(pkg), "\n")
+    cat("✓", pkg, "-", "installed \n")
   } else {
     cat("✗", pkg, "- FAILED TO INSTALL\n")
   }
