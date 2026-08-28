@@ -6,10 +6,26 @@
 
 # Quarto/R Markdown generated files
 *.html
+*.pdf
 *_files/
 *_cache/
 .quarto/
+**/*.quarto_ipynb
+
+# Quarto intermediary render files
+*.rmarkdown
+*.knit.md
+*.tex
+*.log
+*.aux
+*.out
+*.fls
+*.fdb_latexmk
 
 # Temporary files
 .DS_Store
 Thumbs.db
+
+# Project-specific exclusions
+Introduction-to-Statistics-for-Clinical-Research-main/PDF_RENDERING_STATUS.md
+

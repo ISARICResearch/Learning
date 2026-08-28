@@ -101,11 +101,11 @@ cat("\nMissing LOS count:", sum(is.na(lengthofstay)), "\n")
 **Outlier Detection**: Pay attention to extreme values in histograms and boxplots. Outliers may represent data entry errors, genuine rare events, or patients with unusual characteristics that warrant separate analysis or clinical review.
 ::::
 
-```{r, warning=FALSE, error=FALSE, message=FALSE}
+```{r, warning=FALSE, error=FALSE, message=FALSE, fig.width=10, fig.height=10}
 sep("BLOCK 3: Simple visualisations")
 
 # 2 histograms (age & LOS)
-op <- par(mfrow = c(2, 1))
+op <- par(mfrow = c(2, 1), mar = c(4, 4, 2, 2))
 hist(df$demog_age, breaks = 30, main = "Age distribution", xlab = "Age (years)")
 hist(lengthofstay, breaks = 30, main = "Length of stay", xlab = "Days")
 par(op) # reset layout

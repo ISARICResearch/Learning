@@ -4,36 +4,50 @@ Open educational resources for clinical research, biostatistics, epidemiology, d
 
 ## Quick Start
 
-### 1. Install Dependencies
+### Setup & Generate All Course Materials (One Command)
 
-Before running any Quarto documents, install required packages:
+Run this single command to install all dependencies and automatically generate PDF files for all course modules and reference documentation:
 
 ```r
 source("setup_packages.R")
 ```
 
-**Packages installed:**
-- **tidyverse** — Data manipulation and visualization
-- **gtsummary** — Publication-quality summary tables
-- **report** — Automated statistical reporting
-- **quarto** — Quarto document rendering
-- **markdown** — Markdown processing
-- **gt** — Grammar of tables for formatted table output
-- **knitr** — Dynamic document generation
+**What this does:**
+1. ✅ Installs required packages (tidyverse, gtsummary, report, quarto, markdown, gt, knitr)
+2. ✅ Verifies all installations with version info
+3. ✅ **Automatically generates PDF files** from:
+   - 8 Quarto course modules (`.qmd` files)
+   - 9 Markdown reference guides (`.md` files)
+4. ✅ Generates PDFs in their respective directories (ready to read immediately)
 
-The script checks for existing installations and only installs missing packages.
+**Output:**
+- Course material PDFs in: `Introduction-to-Statistics-for-Clinical-Research-main/`
+- Reference guide PDFs in: root directory `./`
 
-### 2. Render Quarto Documents
+**That's it!** After running this script, all course materials are ready to use.
 
-Navigate to the `Introduction-to-Statistics-for-Clinical-Research-main/` directory and render any Quarto document (`.qmd`):
+### Manual Rendering (Optional)
 
-R:
+If you want to re-render specific files manually, use the standalone renderer script:
 
 ```r
-quarto::quarto_render("Introduction-to-Statistics-for-Clinical-Research-main/1_Descriptive Statistics_CREDO.qmd")
+source("renderer.R")
 ```
 
-While in RStudio, you can also click on the `Preview/Render` button to process the file.
+This renders all `.qmd` and `.md` files to PDF without reinstalling packages.
+
+### Render Individual Documents
+
+To render a single document manually:
+
+```r
+# Render a Quarto course module
+quarto::quarto_render("Introduction-to-Statistics-for-Clinical-Research-main/1_Descriptive Statistics_CREDO.qmd", output_format = "pdf")
+
+# Render a markdown guide
+quarto::quarto_render("R_FUNCTIONS_GUIDE.md", output_format = "pdf")
+```
+
 ---
 
 ## Course Materials Overview
@@ -230,28 +244,34 @@ Analyzing time-to-event outcomes with censoring.
 
 ### For Instructors
 
-1. **Render individual modules** as needed in your course
-2. **Modify code examples** to match your clinical context
-3. **Extract callouts** for emphasis on key concepts
-4. **Use comparison tables** (e.g., model comparison in Module 5) for teaching statistical decision-making
+1. **Run `source("setup_packages.R")`** once to generate all PDFs
+2. **Share generated PDFs** with students or use directly in your course
+3. **Modify source documents** (`.qmd` and `.md` files) to customize content
+4. **Render modified documents** using `source("renderer.R")` to generate updated PDFs
+5. **Extract callouts** from course modules for emphasis on key concepts
+6. **Use comparison tables** (e.g., model comparison in Module 5) for teaching statistical decision-making
 
 ### For Students
 
-1. **Run the setup script** to install dependencies
-2. **Start with Basic R Programming module** — Covers essential R skills and type safety
-3. **Consult R_FUNCTIONS_GUIDE.md** — Deep dive on functions and parameter validation
-4. **Work through statistics modules sequentially** (1 → 6) for comprehensive foundation
-5. **Execute code chunks** to see output; modify and experiment
-6. **Review callouts** for best practices and common pitfalls
-7. **Study clinical examples** to understand real-world application
+1. **Run `source("setup_packages.R")`** to install all dependencies and generate all course materials
+2. **PDFs will be ready immediately** in two locations:
+   - Course modules: `Introduction-to-Statistics-for-Clinical-Research-main/` directory
+   - Reference guides: root directory `./`
+3. **Start with Basic R Programming module** — Covers essential R skills and type safety
+4. **Consult R_FUNCTIONS_GUIDE.pdf** — Deep dive on functions and parameter validation
+5. **Work through statistics modules sequentially** (1 → 6) for comprehensive foundation
+6. **Execute code chunks from source `.qmd` files** to see output; modify and experiment
+7. **Review callouts** in PDFs for best practices and common pitfalls
+8. **Study clinical examples** to understand real-world application
 
 ### For Self-Study
 
-1. **Start with Basic R Programming** (prerequisite) for essential R foundations
-2. **Study R_FUNCTIONS_GUIDE.md** for deep understanding of functions and type safety
-3. **Progress through statistics modules** (1 → 6) at your own pace
-4. **Use supporting documentation** for deeper dives (pipe operators, survival analysis)
-5. **Reference guides** for syntax and implementation details
+1. **Run `source("setup_packages.R")`** — One-time setup to install packages and generate all materials
+2. **Start with Basic R Programming PDF** (prerequisite) for essential R foundations
+3. **Study R_FUNCTIONS_GUIDE.pdf** for deep understanding of functions and type safety
+4. **Progress through statistics module PDFs** (1 → 6) at your own pace
+5. **Reference PDF guides** for deeper dives (pipe operators, survival analysis, outlier detection)
+6. **Open corresponding `.qmd` source files** to run code examples and experiment
 
 ---
 
@@ -260,11 +280,16 @@ Analyzing time-to-event outcomes with censoring.
 ```
 credo-learning/
 ├── README.md (this file)
-├── setup_packages.R (run this first!)
-├── R_FUNCTIONS_GUIDE.md (comprehensive functions reference — read after Basic R Programming)
+├── setup_packages.R (run once: installs packages + generates all PDFs)
+├── renderer.R (optional: re-render files manually)
 ├── LICENSE
+├── [Generated PDFs from markdown guides - created by setup_packages.R]
+│   ├── PIPE_OPERATORS_GUIDE.pdf
+│   ├── R_FUNCTIONS_GUIDE.pdf
+│   ├── CLINICAL_RESEARCH_STATISTICS_COMPLETE.pdf
+│   └── [other documentation PDFs]
 ├── Introduction-to-Statistics-for-Clinical-Research-main/
-│   ├── Basic_R_Programming.qmd ⭐ START HERE (prerequisite)
+│   ├── 0_Basic_R_Programming.qmd ⭐ START HERE (prerequisite)
 │   ├── 1_Descriptive Statistics_CREDO.qmd ⭐ ENHANCED
 │   ├── 2_Populations and Samples.qmd
 │   ├── 3_Probability and Confidence Intervals.qmd
@@ -272,24 +297,29 @@ credo-learning/
 │   ├── 4.2_Hypothesis Testing and Rank Tests.qmd
 │   ├── 5_Linear and Logistic Regression_CREDO.qmd ⭐ ENHANCED
 │   ├── 6_Survival Analysis_CREDO.qmd ⭐ ENHANCED
-│   ├── *.html (rendered outputs)
-│   ├── *_files/ (Quarto support directories)
-│   └── README.md (module-level documentation)
+│   ├── [Generated PDFs from course modules]
+│   ├── 0_Basic_R_Programming.pdf
+│   ├── 1_Descriptive-Statistics_CREDO.pdf
+│   ├── [other module PDFs]
+│   └── *.R (companion R scripts for each module)
 ├── PIPE_OPERATORS_GUIDE.md
+├── R_FUNCTIONS_GUIDE.md
 ├── CLINICAL_RESEARCH_STATISTICS_COMPLETE.md
-└── [other documentation files]
+└── [other reference documentation]
 ```
 
 ---
 
 ## Key Features
 
+✅ **One-Command Setup** — Run `source("setup_packages.R")` to install all dependencies and generate all course materials  
 ✅ **Clinical Context** — All examples use realistic clinical research scenarios  
 ✅ **Best Practices** — 30+ strategic callouts highlighting key concepts and pitfalls  
 ✅ **Executable Code** — Every code chunk is fully functional and tested  
 ✅ **Statistical Rigor** — Emphasis on assumptions, diagnostics, and proper interpretation  
 ✅ **Type Safety** — R function guide emphasizes type expectations and validation  
-✅ **Comprehensive** — 7 sequential modules covering statistics fundamentals to survival analysis
+✅ **Comprehensive** — 8 sequential modules covering R programming fundamentals through survival analysis  
+✅ **PDF Ready** — All course materials and reference guides automatically generated as PDFs
 
 ---
 
@@ -310,18 +340,18 @@ See LICENSE file for terms and conditions.
 
 ## Getting Help
 
-- Review the **callouts** in each Quarto document for best practices
-- Consult `PIPE_OPERATORS_GUIDE.md` for pipe syntax questions
-- Reference `R_FUNCTIONS_GUIDE.md` for function calling and type safety
-- Check individual module READMEs for module-specific guidance
+- **Review callouts in PDFs** — Each course module PDF contains strategic callouts highlighting best practices
+- **Consult reference PDFs** — Reference guides (PIPE_OPERATORS_GUIDE.pdf, R_FUNCTIONS_GUIDE.pdf) provide quick answers
+- **View source `.qmd` files** — Open corresponding `.qmd` files to run and modify code examples
+- **Check module documentation** — Each module directory contains a README with module-specific guidance
 
 ---
 
 ## Contributing
 
 To enhance these materials:
-1. Test all code examples thoroughly
-2. Add clinical context where helpful
-3. Document any structural changes
-4. Ensure git tracking is clean (HTML files in `.gitignore`)
+1. Modify source files (`.qmd` for course modules, `.md` for documentation)
+2. Test all code examples thoroughly before finalizing
+3. Add clinical context where helpful
+4. Run `source("renderer.R")` to generate updated PDFs locally
 5. Update this README with new modules or features
