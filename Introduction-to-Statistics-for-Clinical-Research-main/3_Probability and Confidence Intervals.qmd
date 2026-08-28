@@ -162,7 +162,7 @@ hist(
   df$labs_platelets_103ul,
   breaks = 30,
   main = "Platelet Count: Distribution with 95% Reference Range",
-  xlab = "Platelets (10³/μL)",
+  xlab = "Platelets (10³/µL)",
   col = "lightblue",
   border = "gray"
 )
@@ -249,7 +249,7 @@ plot(
   ylim = range(c(ci_lo, ci_hi)),
   xaxt = "n",
   xlab = "Sample Size",
-  ylab = "Mean Platelets (10³/μL)",
+  ylab = "Mean Platelets (10³/µL)",
   main = "95% Confidence Interval Narrows as Sample Size Increases",
   pch = 19,
   cex = 1.5,

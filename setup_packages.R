@@ -3,20 +3,20 @@
 
 # List of required packages
 required_packages <- c(
-  "tidyverse",
   "stringi",
+  "tidyverse",
   "gtsummary",
+  "report",
   "quarto",
   "markdown",
   "gt",
-  "knitr",
-  "report"
+  "knitr"
 )
 
 # Check which packages are not installed
 missing_packages <- required_packages[
   !sapply(required_packages, function(pkg) {
-    requireNamespace(pkg, quietly = TRUE)
+    requireNamespace(pkg)
   })
 ]
 
@@ -38,9 +38,3 @@ for (pkg in required_packages) {
     cat("✗", pkg, "- FAILED TO INSTALL\n")
   }
 }
-
-# Render all course materials (Quarto documents and markdown documentation)
-cat("\n========================================\n")
-cat("Generating all course materials...\n")
-cat("========================================\n")
-source("renderer.R")
