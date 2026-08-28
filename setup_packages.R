@@ -16,7 +16,7 @@ required_packages <- c(
 # Check which packages are not installed
 missing_packages <- required_packages[
   !sapply(required_packages, function(pkg) {
-    requireNamespace(pkg, quietly = TRUE)
+    requireNamespace(pkg)
   })
 ]
 
