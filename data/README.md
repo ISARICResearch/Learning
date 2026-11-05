@@ -5,7 +5,7 @@ This folder contains synthetic clinical datasets developed to support demonstrat
 
 ## Purpose
 
-The datasets provide realistic clinical data compatible with the platform structure, allowing analysts to develop, test, and familiarise themselves with analytical workflows while real-world data collection is ongoing.
+The datasets provide plausible clinical data compatible with the platform structure, allowing analysts to develop, test, and familiarise themselves with analytical workflows while real-world data collection is ongoing.
 
 These datasets are intended for software development, methodological training, and demonstration purposes. They are not intended for clinical inference, predictive model validation, or the generation of substantive research findings.
 
